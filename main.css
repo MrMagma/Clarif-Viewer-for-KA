@@ -1,0 +1,113 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.hidden {
+    display: none;
+}
+
+.content {
+    font-family: sans-serif;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    overflow-x: hidden;
+}
+
+.topic-slug-selection {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20%;
+    height: 100%;
+}
+
+.output-results-holder {
+    position: absolute;
+    top: 0;
+    left: 20%;
+    width: 40%;
+    height: 100%;
+}
+
+.output-filters {
+    position: absolute;
+    top: 0;
+    left: 60%;
+    width: 40%;
+    height: 100%;
+}
+
+.output-filters-tree {
+    margin-left: 2em;
+}
+
+.panel-header {
+    display: block;
+    width: 100%;
+    font-size: 1.5em;
+    height: 2em;
+    line-height: 2em;
+    padding: 0 1em;
+}
+
+.topic-slug-option {
+    width: 100%;
+    font-size: 1.5em;
+    height: 2em;
+    line-height: 2em;
+    color: #FFF;
+    transition: height 0.3s ease, line-height 0.3s ease;
+}
+
+.topic-slug-option ~ .topic-slug-option {
+    border-top: 0.1em solid rgba(0, 0, 0, 0.12);
+}
+
+.topic-slug-option + .topic-slug-option {
+    border-bottom: 0.1em solid rgba(0, 0, 0, 0.12);
+}
+
+.topic-slug-option > p {
+    margin: 0 2em;
+}
+
+.topic-slug-option.selected {
+    height: 3em;
+    line-height: 3em;
+}
+
+.clarif-holder {
+    padding: 1em 2em;
+    color: rgba(0, 0, 0, 0.87);
+    margin: 0.5em;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.clarif-content {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    padding-bottom: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.loader {
+    text-align: center;
+    font-size: 3em;
+}
+
+.filter-tree-node {
+    border-left: 1px solid rgba(0, 0, 0, 0.12);
+    padding-left: 1.5em;
+}
+
+.filter-tree-node > .filter-tree-node-name {
+    color: rgba(0, 0, 0, 0.87)
+}
+
+.filter-tree-node.filter-node-selected > .filter-tree-node-name {
+    font-weight: bold;
+    color: #4CAF50;
+}
