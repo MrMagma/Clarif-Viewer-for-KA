@@ -182,7 +182,6 @@
     }
     
     function addActiveRequests(amount, slug) {
-        console.log(slug);
         topicSlugData[slug].activeRequests += amount;
         $loaderPending.text(topicSlugData[slug].activeRequests);
     }
@@ -362,7 +361,6 @@
     function onTreeClick(path) {
         filterPath = "/" + path
             .map(function(el) {return el.name;}).join("/");
-        console.log(filterPath);
         showClarifs(this.name, filterEntries);
     }
     
