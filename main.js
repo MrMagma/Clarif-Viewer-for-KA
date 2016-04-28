@@ -86,61 +86,71 @@
             title: "Math",
             color: "#1C758A",
             $el: null,
-            tree: new FilterTree("math")
+            tree: new FilterTree("math"),
+            activeRequests: 0
         },
         "science": {
             title: "Science",
             color: "#94424F",
             $el: null,
-            tree: new FilterTree("science")
+            tree: new FilterTree("science"),
+            activeRequests: 0
         },
         "economics-finance-domain": {
             title: "Economics and Finance",
             color: "#B77033",
             $el: null,
-            tree: new FilterTree("economics-finance-domain")
+            tree: new FilterTree("economics-finance-domain"),
+            activeRequests: 0
         },
         "humanities": {
             title: "Arts and Humanities",
             color: "#AD3434",
             $el: null,
-            tree: new FilterTree("humanities")
+            tree: new FilterTree("humanities"),
+            activeRequests: 0
         },
         "computing": {
             title: "Computing",
             color: "#437A39",
             $el: null,
-            tree: new FilterTree("computing")
+            tree: new FilterTree("computing"),
+            activeRequests: 0
         },
         "test-prep": {
             title: "Test Prep",
             color: "#644172",
             $el: null,
-            tree: new FilterTree("test-prep")
+            tree: new FilterTree("test-prep"),
+            activeRequests: 0
         },
         "partner-content": {
             title: "Partner Content",
             color: "#218270",
             $el: null,
-            tree: new FilterTree("partner-content")
+            tree: new FilterTree("partner-content"),
+            activeRequests: 0
         },
         "college-admissions": {
             title: "College Admissions",
             color: DEFAULT_COLOR,
             $el: null,
-            tree: new FilterTree("college-admissions")
+            tree: new FilterTree("college-admissions"),
+            activeRequests: 0
         },
         "talks-and-interviews": {
             title: "Talks and Interviews",
             color: DEFAULT_COLOR,
             $el: null,
-            tree: new FilterTree("talks-and-interviews")
+            tree: new FilterTree("talks-and-interviews"),
+            activeRequests: 0
         },
         "coach-res": {
             title: "Coach Resources",
             color: DEFAULT_COLOR,
             $el: null,
-            tree: new FilterTree("coach-res")
+            tree: new FilterTree("coach-res"),
+            activeRequests: 0
         }
     };
     
@@ -159,11 +169,26 @@
     var $clarifsOutput;
     var $filtersContainer;
     var $filterTree;
-    var $loader;
+    var $loaderPending;
+    var $failedNum;
     
     var filterPath = "/";
+    var activeSlug = "";
+    var numFailed = 0;
     
-    function loadContentClarifs(content, cb) {
+    function addFailedRequest() {
+        numFailed += 1;
+        $failedNum.text(numFailed);
+    }
+    
+    function addActiveRequests(amount, slug) {
+        console.log(slug);
+        topicSlugData[slug].activeRequests += amount;
+        $loaderPending.text(topicSlugData[slug].activeRequests);
+    }
+    
+    function loadContentClarifs(content, cb, baseSlug) {
+        addActiveRequests(1, baseSlug);
         $.getJSON({
             url: util.formatString(API_PATH + apiSlugs.clarifications, {
                 type: (content.kind === "Article") ? "article" : "youtubevideo",
@@ -171,9 +196,11 @@
             }),
             dataType: "jsonp"
         }).done(function(data, status) {
+            addActiveRequests(-1, baseSlug);
             if (status === "success") {
                 cb((data || {feedback: []}).feedback, true);
             } else {
+                addFailedRequest();
                 cb([], false);
             }
         });
@@ -191,28 +218,31 @@
                     break;
                 case "Article":
                 case "Video":
-                    loadContentClarifs(topic.children[i], cb);
+                    loadContentClarifs(topic.children[i], cb, baseSlug);
             }
         }
-        
-        var path = topic.relative_url.slice(1).split("/");
-        var tree = topicSlugData[baseSlug].tree;
-        // Get rid of the first (always empty) slug
-        var slug = path.shift();
-        while (path.length > 0) {
-            slug = path.shift();
-            if (!tree.hasChild(slug)) {
-                tree.addChild(slug);
+        if (typeof topic.relative_url === "string") {
+            var path = topic.relative_url.slice(1).split("/");
+            var tree = topicSlugData[baseSlug].tree;
+            // Get rid of the first (always empty) slug
+            var slug = path.shift();
+            while (path.length > 0) {
+                slug = path.shift();
+                if (!tree.hasChild(slug)) {
+                    tree.addChild(slug);
+                }
+                tree = tree.getChild(slug);
             }
-            tree = tree.getChild(slug);
         }
     }
     
     function loadClarifs(url, cb, baseSlug) {
+        addActiveRequests(1, baseSlug);
         $.getJSON({
             url: url,
             dataType: "jsonp"
         }).done(function(data, status) {
+            addActiveRequests(-1, baseSlug);
             if (status === "success") {
                 if (typeof baseSlug !== "string") {
                     baseSlug = data.node_slug;
@@ -226,6 +256,7 @@
                         loadContentClarifs(data, cb);
                 }
             } else {
+                addFailedRequest();
                 cb([], false);
             }
         });
@@ -237,7 +268,7 @@
             .append($("<p>" + clarif.content + "</p>")
                 .addClass("clarif-content"))
             .append($("<p>Clarification on </p>")
-                .append($("<a href='https://khanacademy.org/" +
+                .append($("<a href='https://khanacademy.org" +
                     clarif.focusUrl + "'>" + clarif.focusUrl + "</a>"))
                 .addClass("clarif-link-line"));
     }
@@ -259,31 +290,39 @@
         }
         $clarifsOutput.html("");
         var numClarifs = 0;
-        if (!cache[slug]) {
+        // If we don't have the data cached and we haven't requested it yet.
+        if (!cache[slug] && topicSlugData[slug].activeRequests === 0) {
             cache[slug] = [];
-            $loader.removeClass("hidden");
             loadClarifs(util.formatString(API_PATH + apiSlugs.topic, {
                 topicSlug: slug
             }, slug), function(clarifs) {
                 for (var i = 0; i < clarifs.length; ++i) {
                     if (filter(clarifs[i])) {
+                        ++numClarifs;
                         $clarifsOutput.append(createClarifEl(clarifs[i]));
                     }
                 }
-                numClarifs += clarifs.length;
                 cache[slug].push.apply(cache[slug], clarifs);
-                $loader.addClass("hidden");
-                $clarifsHeader.text("Clarifications in " +
-                    topicSlugData[slug].title + " (" + numClarifs + ")");
-            });
+                if (activeSlug === slug) {
+                    $clarifsHeader.text("Clarifications in " +
+                        topicSlugData[slug].title + " ");
+                    $numClarifs.text("(Showing " + numClarifs + " of " +
+                        cache[slug].length + ")");
+                }
+            }, slug);
         } else {
             for (var i = 0; i < cache[slug].length; ++i) {
                 if (filter(cache[slug][i])) {
+                    ++numClarifs;
                     $clarifsOutput.append(createClarifEl(cache[slug][i]));
                 }
             }
-            $clarifsHeader.text("Clarifications in " +
-                topicSlugData[slug].title + " (" + cache[slug].length + ")");
+            if (activeSlug === slug) {
+                $clarifsHeader.text("Clarifications in " +
+                    topicSlugData[slug].title + " ");
+                $numClarifs.text("(Showing " + numClarifs + " of " +
+                    cache[slug].length + ")");
+            }
         }
         showFilterTree(slug);
     }
@@ -296,7 +335,8 @@
         for (var i = 0; i < topicSlugs.length; ++i) {
             topicSlugData[topicSlugs[i]].$el.removeClass("selected");
         }
-        filterPath = "/";
+        filterPath = "/" + slug;
+        activeSlug = slug;
         topicSlugData[slug].$el.addClass("selected");
         $filtersContainer.removeClass("hidden");
         $clarifsHeader.text("Clarifications in " +
@@ -331,12 +371,13 @@
             data.tree.onClick = onTreeClick;
             slugSelection.append(data.$el);
         }
-        $clarifsHeader = $(".clarifs-header");
-        $numClarifs = $(".num-clarifs");
+        $clarifsHeader = $(".clarifs-header-main-content");
+        $numClarifs = $(".num-clarifs-shown");
         $clarifsOutput = $(".output-results");
         $filtersContainer = $(".output-filters");
         $filterTree = $(".output-filters-tree");
-        $loader = $(".loader");
+        $loaderPending = $(".num-pending");
+        $failedNum = $(".num-failed");
     });
     
 })();
