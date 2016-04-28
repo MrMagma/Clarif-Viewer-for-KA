@@ -334,6 +334,7 @@
     function switchTopic(slug) {
         for (var i = 0; i < topicSlugs.length; ++i) {
             topicSlugData[topicSlugs[i]].$el.removeClass("selected");
+            topicSlugData[topicSlugs[i]].tree.$node.addClass("hidden");
         }
         filterPath = "/" + slug;
         activeSlug = slug;
@@ -341,8 +342,10 @@
         $filtersContainer.removeClass("hidden");
         $clarifsHeader.text("Clarifications in " +
             topicSlugData[slug].title);
-        $filterTree.html("");
-        $filterTree.append(topicSlugData[slug].tree);
+        topicSlugData[slug].tree.$node.removeClass("hidden");
+        if (!topicSlugData[slug].tree.$node.parent().length) {
+            $filterTree.append(topicSlugData[slug].tree.$node);
+        }
         showClarifs(slug, filterEntries);
     }
     
