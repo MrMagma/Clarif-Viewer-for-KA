@@ -66,7 +66,7 @@
         
     })();
     
-    var API_PATH = "https://www.khanacademy.org/api/";
+    var API_PATH = "https://{{lang}}.khanacademy.org/api/";
     var DEFAULT_COLOR = "#555555";
     
     var apiSlugs = {
@@ -74,6 +74,7 @@
         clarifications: "internal/discussions/{{type}}/{{id}}/clarifications"
     };
     
+    var languages = ["en", "es", "pt", "fr", "tr", "nb", "hi"];
     // (Joshua): I couldn't find any public call to the KA API that could get
     //  all of the top level slugs in a reasonable amount of time so I just
     //  hardcoded them here. The top-level slugs are unlikely to change very
@@ -159,6 +160,23 @@
             return str.replace(/\{\{(.+?)\}\}/g, function(match, p1) {
                 return data[p1];
             });
+        },
+        urlParamsToJSON: function urlParamsToJSON() {
+            var json = {};
+            
+            var params = (window.location.href.split("?")[1] || "").split("&");
+            
+            for (var i = 0; i < params.length; ++i) {
+                var prop = params[i].split("=");
+                json[prop[0]] = prop[1];
+            }
+            
+            return json;
+        },
+        jsonToUrlParams: function jsonToUrlParams(json) {
+            return Object.keys(json).map(function(key) {
+                return key + "=" + json[key];
+            }).join("&");
         }
     };
     
@@ -175,6 +193,7 @@
     var filterPath = "/";
     var activeSlug = "";
     var numFailed = 0;
+    var options = util.urlParamsToJSON();
     
     function addFailedRequest() {
         numFailed += 1;
@@ -191,7 +210,8 @@
         $.getJSON({
             url: util.formatString(API_PATH + apiSlugs.clarifications, {
                 type: (content.kind === "Article") ? "article" : "youtubevideo",
-                id: content.internal_id
+                id: content.internal_id,
+                lang: options.lang
             }),
             dataType: "jsonp"
         }).done(function(data, status) {
@@ -212,7 +232,8 @@
             switch (topic.children[i].kind) {
                 case "Topic":
                     loadClarifs(util.formatString(API_PATH + apiSlugs.topic, {
-                            topicSlug: topic.children[i].node_slug
+                            topicSlug: topic.children[i].node_slug,
+                            lang: options.lang
                         }), cb, baseSlug);
                     break;
                 case "Article":
@@ -267,9 +288,10 @@
             .append($("<p>" + clarif.content + "</p>")
                 .addClass("clarif-content"))
             .append($("<p>Clarification on </p>")
-                .append($("<a href='https://khanacademy.org" +
-                    clarif.focusUrl + "'>" + clarif.focusUrl + "</a>"))
-                .addClass("clarif-link-line"));
+                .append($("<a href='" + util.formatString(API_PATH, {
+                    lang: options.lang
+                }) + clarif.focusUrl + "'>" + clarif.focusUrl + "</a>"))
+                    .addClass("clarif-link-line"));
     }
     
     function showFilterTree(slug) {
@@ -293,7 +315,8 @@
         if (!cache[slug] && topicSlugData[slug].activeRequests === 0) {
             cache[slug] = [];
             loadClarifs(util.formatString(API_PATH + apiSlugs.topic, {
-                topicSlug: slug
+                topicSlug: slug,
+                lang: options.lang
             }, slug), function(clarifs) {
                 for (var i = 0; i < clarifs.length; ++i) {
                     if (filter(clarifs[i])) {
@@ -358,20 +381,51 @@
             .append($("<p>" + data.title + "</p>"));
     }
     
+    function changeLang(lang) {
+        options.lang = lang;
+        window.location.href = window.location.href.split("?")[0] + "?" +
+            util.jsonToUrlParams(options);
+    }
+    
     function onTreeClick(path) {
         filterPath = "/" + path
             .map(function(el) {return el.name;}).join("/");
         showClarifs(this.name, filterEntries);
     }
     
-    $(document).ready(function() {
-        var slugSelection = $(".topic-slug-selection");
+    function initSlugSelector() {
+        var $slugSelection = $(".topic-slug-selection");
+        
         for (var i = 0; i < topicSlugs.length; ++i) {
             var data = topicSlugData[topicSlugs[i]];
             data.$el = createSlugEl(topicSlugs[i], data);
             data.tree.onClick = onTreeClick;
-            slugSelection.append(data.$el);
+            $slugSelection.append(data.$el);
         }
+    }
+    
+    function createLanguageOption(lang) {
+        return $("<a>")
+            .attr("href", "javascript: void(0);")
+            .text(lang)
+            .click(function() {
+                changeLang(lang);
+            })
+            .addClass("language-selection-option");
+    }
+    
+    function initLanguageSelector() {
+        var $langSelect = $(".language-selection");
+        
+        for (var i = 0; i < languages.length; ++i) {
+            $langSelect.append(createLanguageOption(languages[i]));
+        }
+    }
+    
+    $(document).ready(function() {
+        initSlugSelector();
+        initLanguageSelector();
+        
         $clarifsHeader = $(".clarifs-header-main-content");
         $numClarifs = $(".num-clarifs-shown");
         $clarifsOutput = $(".output-results");
@@ -379,6 +433,10 @@
         $filterTree = $(".output-filters-tree");
         $loaderPending = $(".num-pending");
         $failedNum = $(".num-failed");
+        
+        options.lang = ((typeof options.lang === "string" &&
+            options.lang.length > 0) ? options.lang : "www")
+            .replace(/[^a-z]/i, "").toLowerCase();
     });
     
 })();
