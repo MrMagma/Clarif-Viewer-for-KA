@@ -39,13 +39,20 @@
             onClick: function onClick(path) {
                 // A placeholder for any listener the user wants to put in.
             },
-            addEntries: function addEntries(num) {
-                this.entries += num;
+            setEntries: function setEntries(num) {
+                var oEntries = this.entries;
+                
+                this.entries = num;
+                
                 this._$entriesNode.text("(" + this.entries + ")");
                 
                 if (this.parent !== null) {
-                    this.parent.addEntries(num);
+                    this.parent.setEntries(this.parent.entries - oEntries +
+                        num);
                 }
+            },
+            addEntries: function addEntries(num) {
+                this.setEntries(this.entries + num);
             },
             hide: function hide() {
                 this.$node.addClass("hidden");
@@ -257,10 +264,10 @@
                     feedback[i].contentKind = kind;
                 }
                 
-                cb(feedback, topicUrl, true);
+                cb(feedback, topicUrl, baseSlug, true);
             } else {
                 addFailedRequest();
-                cb([], "", false);
+                cb([], "", "", false);
             }
         });
     }
@@ -317,7 +324,7 @@
                 }
             } else {
                 addFailedRequest();
-                cb([], "", false);
+                cb([], "", "", false);
             }
         });
     }
@@ -375,13 +382,19 @@
                     }
                 }
                 
+                
                 cache[slug].push.apply(cache[slug], clarifs);
+                
+                
                 if (activeSlug === slug) {
                     $clarifsHeader.text("Clarifications in " +
                         topicSlugData[slug].title + " ");
                     $numClarifs.text("(Showing " + numClarifs + " of " +
                         cache[slug].length + ")");
                 }
+                
+                topicSlugData[slug].tree.getChildAtPath(topicUrl
+                    .replace(/^\/.+?\//, "")).addEntries(clarifs.length);
             }, slug);
         } else {
             for (var i = 0; i < cache[slug].length; ++i) {
@@ -397,8 +410,6 @@
                     cache[slug].length + ")");
             }
         }
-        topicSlugData[slug].tree.getChildAtPath(topicUrl
-            .replace(/^\/.+?\//, "")).addEntries(numClarifs);
         
         showFilterTree(slug);
     }
