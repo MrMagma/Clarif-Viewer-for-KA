@@ -5,9 +5,13 @@
         function FilterTree(name) {
             this.name = name;
             this.children = {};
+            this.entries = 0;
+            this._$entriesNode = $("<span>")
+                .text("(" + this.entries + ")");
             this.$node = $("<div>")
                 .addClass("filter-tree-node")
-                .append($("<p>" + this.name + "</p>")
+                .append($("<p>" + this.name + " </p>")
+                    .append(this._$entriesNode)
                     .addClass("filter-tree-node-name"))
                 .click(this._onClickEvent.bind(this));
             this.parent = null;
@@ -35,6 +39,14 @@
             onClick: function onClick(path) {
                 // A placeholder for any listener the user wants to put in.
             },
+            addEntries: function addEntries(num) {
+                this.entries += num;
+                this._$entriesNode.text("(" + this.entries + ")");
+                
+                if (this.parent !== null) {
+                    this.parent.addEntries(num);
+                }
+            },
             hide: function hide() {
                 this.$node.addClass("hidden");
             },
@@ -59,6 +71,25 @@
             },
             getChild: function getChild(name) {
                 return this.children[name];
+            },
+            getChildAtPath: function getChildAtPath(path) {
+                path = path.split("/");
+                
+                var child = this;
+                var slug;
+                while (path.length) {
+                    slug = path.shift();
+                    if (!slug.length) {
+                        continue;
+                    }
+                    if (!child.hasChild(slug)) {
+                        break;
+                    }
+                    
+                    child = child.getChild(slug);
+                }
+                
+                return child;
             }
         };
         
@@ -207,7 +238,7 @@
         $loaderPending.text(topicSlugData[slug].activeRequests);
     }
     
-    function loadContentClarifs(content, cb, baseSlug) {
+    function loadContentClarifs(content, topicUrl, cb, baseSlug) {
         addActiveRequests(1, baseSlug);
         $.getJSON({
             url: util.formatString(API_PATH + apiSlugs.clarifications, {
@@ -226,30 +257,15 @@
                     feedback[i].contentKind = kind;
                 }
                 
-                cb(feedback, true);
+                cb(feedback, topicUrl, true);
             } else {
                 addFailedRequest();
-                cb([], false);
+                cb([], "", false);
             }
         });
     }
     
     function loadTopicClarifs(topic, cb, baseSlug) {
-        var url = "";
-        
-        for (var i = 0; i < topic.children.length; ++i) {
-            switch (topic.children[i].kind) {
-                case "Topic":
-                    loadClarifs(util.formatString(API_PATH + apiSlugs.topic, {
-                            topicSlug: topic.children[i].node_slug,
-                            lang: options.lang
-                        }), cb, baseSlug);
-                    break;
-                case "Article":
-                case "Video":
-                    loadContentClarifs(topic.children[i], cb, baseSlug);
-            }
-        }
         if (typeof topic.relative_url === "string") {
             var path = topic.relative_url.slice(1).split("/");
             var tree = topicSlugData[baseSlug].tree;
@@ -261,6 +277,21 @@
                     tree.addChild(slug);
                 }
                 tree = tree.getChild(slug);
+            }
+        }
+        
+        for (var i = 0; i < topic.children.length; ++i) {
+            switch (topic.children[i].kind) {
+                case "Topic":
+                    loadClarifs(util.formatString(API_PATH + apiSlugs.topic, {
+                            topicSlug: topic.children[i].node_slug,
+                            lang: options.lang
+                        }), cb, baseSlug);
+                    break;
+                case "Article":
+                case "Video":
+                    loadContentClarifs(topic.children[i], topic.relative_url,
+                        cb, baseSlug);
             }
         }
     }
@@ -286,7 +317,7 @@
                 }
             } else {
                 addFailedRequest();
-                cb([], false);
+                cb([], "", false);
             }
         });
     }
@@ -336,13 +367,14 @@
             loadClarifs(util.formatString(API_PATH + apiSlugs.topic, {
                 topicSlug: slug,
                 lang: options.lang
-            }, slug), function(clarifs) {
+            }, slug), function(clarifs, topicUrl) {
                 for (var i = 0; i < clarifs.length; ++i) {
                     if (filter(clarifs[i])) {
                         ++numClarifs;
                         $clarifsOutput.append(createClarifEl(clarifs[i]));
                     }
                 }
+                
                 cache[slug].push.apply(cache[slug], clarifs);
                 if (activeSlug === slug) {
                     $clarifsHeader.text("Clarifications in " +
@@ -365,6 +397,9 @@
                     cache[slug].length + ")");
             }
         }
+        topicSlugData[slug].tree.getChildAtPath(topicUrl
+            .replace(/^\/.+?\//, "")).addEntries(numClarifs);
+        
         showFilterTree(slug);
     }
     
