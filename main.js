@@ -378,7 +378,8 @@
                 "background-color": data.color
             })
             .click(switchTopic.bind(switchTopic, slug))
-            .append($("<p>" + data.title + "</p>"));
+            .append($("<p>" + data.title + "</p>")
+                .addClass("text-overflow-ellipsis"));
     }
     
     function changeLang(lang) {
