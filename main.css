@@ -64,7 +64,7 @@
     background: #FFF;
 }
 
-.output-filters-tree {
+.filter-controls-wrapper {
     position: absolute;
     top: 6em;
     left: 0;
@@ -74,6 +74,10 @@
     padding-bottom: 1em;
     overflow-y: scroll;
     overflow-x: hidden;
+}
+
+.filter-controls-form {
+    padding: 1em;
 }
 
 .filters-header.filters-header {

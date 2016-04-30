@@ -189,6 +189,8 @@
     var $filterTree;
     var $loaderPending;
     var $failedNum;
+    var $articlesToggle;
+    var $videosToggle;
     
     var filterPath = "/";
     var activeSlug = "";
@@ -367,7 +369,15 @@
     }
     
     function filterEntries(clarif) {
-        return (clarif.focusUrl.indexOf(filterPath) === 0);
+        return (
+                    (
+                        (clarif.contentKind === "article" && $articlesToggle
+                            .is(":checked")) ||
+                        (clarif.contentKind === "article" && $articlesToggle
+                            .is(":checked"))
+                    ) &&
+                    clarif.focusUrl.indexOf(filterPath) === 0
+                );
     }
     
     function switchTopic(slug) {
@@ -451,10 +461,16 @@
         $filterTree = $(".output-filters-tree");
         $loaderPending = $(".num-pending");
         $failedNum = $(".num-failed");
+        $articlesToggle = $("#articles-toggle");
+        $videosToggle = $("videos-toggle");
         
         options.lang = ((typeof options.lang === "string" &&
             options.lang.length > 0) ? options.lang : "www")
             .replace(/[^a-z]/i, "").toLowerCase();
+        
+        $(".filter-controls-form :input").change(function() {
+            showClarifs(activeSlug, filterEntries);
+        });
     });
     
 })();

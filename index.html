@@ -47,7 +47,15 @@
             </div>
             <div class="output-filters hidden">
                 <h2 class="panel-header filters-header">Filter Results</h2>
-                <div class="output-filters-tree"></div>
+                <div class="filter-controls-wrapper">
+                    <form class="filter-controls-form">
+                        <input id="videos-toggle" name="videos-toggle" checked="true" type="checkbox">
+                        <label for="videos-toggle">Videos</label>
+                        <input id="articles-toggle" name="articles-toggle" checked="true" type="checkbox">
+                        <label for="articles-toggle">Articles</label>
+                    </form>
+                    <div class="output-filters-tree"></div>
+                </div>
             </div>
         </div>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
