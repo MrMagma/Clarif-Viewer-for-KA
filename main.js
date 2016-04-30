@@ -217,7 +217,14 @@
         }).done(function(data, status) {
             addActiveRequests(-1, baseSlug);
             if (status === "success") {
-                cb((data || {feedback: []}).feedback, true);
+                feedback = (data || {feedback: []}).feedback;
+                
+                var kind = (content.kind || "unknown").toLowerCase();
+                for (var i = 0; i < feedback.length; ++i) {
+                    feedback[i].contentKind = kind;
+                }
+                
+                cb(feedback, true);
             } else {
                 addFailedRequest();
                 cb([], false);
@@ -282,6 +289,15 @@
         });
     }
     
+    function createClarifTags(clarif) {
+        return $("<div>")
+            .addClass("clarif-tag-row")
+            .append($("<span>")
+                .text(clarif.contentKind)
+                .addClass("clarif-tag-badge")
+                .addClass("clarif-tag-" + (clarif.contentKind)));
+    }
+    
     function createClarifEl(clarif) {
         return $("<div>")
             .addClass("clarif-holder")
@@ -291,7 +307,8 @@
                 .append($("<a href='" + util.formatString(API_PATH, {
                     lang: options.lang
                 }) + clarif.focusUrl + "'>" + clarif.focusUrl + "</a>"))
-                    .addClass("clarif-link-line"));
+                    .addClass("clarif-link-line"))
+            .append(createClarifTags(clarif));
     }
     
     function showFilterTree(slug) {
