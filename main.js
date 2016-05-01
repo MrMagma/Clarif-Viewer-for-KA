@@ -104,12 +104,12 @@
         
     })();
     
-    var API_PATH = "https://{{lang}}.khanacademy.org/api/";
+    var API_PATH = "https://{{lang}}.khanacademy.org";
     var DEFAULT_COLOR = "#555555";
     
     var apiSlugs = {
-        topic: "v1/topic/{{topicSlug}}",
-        clarifications: "internal/discussions/{{type}}/{{id}}/clarifications"
+        topic: "/api/v1/topic/{{topicSlug}}",
+        clarifications: "/api/internal/discussions/{{type}}/{{id}}/clarifications"
     };
     
     var languages = ["en", "es", "pt", "fr", "tr", "nb", "hi"];
@@ -346,7 +346,8 @@
             .append($("<p>Clarification on </p>")
                 .append($("<a href='" + util.formatString(API_PATH, {
                     lang: options.lang
-                }) + clarif.focusUrl + "'>" + clarif.focusUrl + "</a>"))
+                }) + clarif.focusUrl + "'>" + clarif.focusUrl + "</a>")
+                    .attr("target", "_blank"))
                     .addClass("clarif-link-line"))
             .append(createClarifTags(clarif));
     }
