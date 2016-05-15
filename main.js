@@ -109,6 +109,7 @@
     
     var apiSlugs = {
         topic: "/api/v1/topic/{{topicSlug}}",
+        videoData: "/api/v1/videos/{{videoSlug}}",
         clarifications: "/api/internal/discussions/{{type}}/{{id}}/clarifications"
     };
     
@@ -245,23 +246,30 @@
         $loaderPending.text(topicSlugData[slug].activeRequests);
     }
     
-    function loadContentClarifs(content, topicUrl, cb, baseSlug) {
+    function loadContentClarifs(content, cb, baseSlug, topicUrl, id) {
         addActiveRequests(1, baseSlug);
+        
         $.getJSON({
             url: util.formatString(API_PATH + apiSlugs.clarifications, {
                 type: (content.kind === "Article") ? "article" : "youtubevideo",
-                id: content.internal_id,
+                id: id,
                 lang: options.lang
             }),
+            data: {
+                casing: "camel",
+                lang: options.lang
+            },
             dataType: "jsonp"
         }).done(function(data, status) {
             addActiveRequests(-1, baseSlug);
+            
             if (status === "success") {
                 feedback = (data || {feedback: []}).feedback;
                 
                 var kind = (content.kind || "unknown").toLowerCase();
                 for (var i = 0; i < feedback.length; ++i) {
                     feedback[i].contentKind = kind;
+                    feedback[i].topicUrl = topicUrl;
                 }
                 
                 cb(feedback, topicUrl, baseSlug, true);
@@ -272,9 +280,32 @@
         });
     }
     
-    function loadTopicClarifs(topic, cb, baseSlug) {
-        if (typeof topic.relative_url === "string") {
-            var path = topic.relative_url.slice(1).split("/");
+    function loadVideoClarifs(video, cb, baseSlug, topicUrl) {
+        addActiveRequests(1, baseSlug);
+        $.getJSON({
+            url: util.formatString(API_PATH + apiSlugs.videoData, {
+                lang: options.lang,
+                videoSlug: video.id
+            }),
+            data: {
+                casing: "camel",
+                lang: options.lang
+            },
+            dataType: "jsonp"
+        }).done(function(data, status) {
+            addActiveRequests(-1, baseSlug);
+            if (status === "success") {
+                loadContentClarifs(video, cb, baseSlug, topicUrl, data
+                    .youtubeId);
+            } else {
+                addFailedRequest();
+            }
+        });
+    }
+    
+    function addTopicToTree(topic, baseSlug) {
+        if (typeof topic.relativeUrl === "string") {
+            var path = topic.relativeUrl.slice(1).split("/");
             var tree = topicSlugData[baseSlug].tree;
             // Get rid of the first (always empty) slug
             var slug = path.shift();
@@ -286,19 +317,26 @@
                 tree = tree.getChild(slug);
             }
         }
+    }
+    
+    function loadTopicClarifs(topic, cb, baseSlug) {
+        addTopicToTree(topic, baseSlug);
         
         for (var i = 0; i < topic.children.length; ++i) {
             switch (topic.children[i].kind) {
                 case "Topic":
                     loadClarifs(util.formatString(API_PATH + apiSlugs.topic, {
-                            topicSlug: topic.children[i].node_slug,
+                            topicSlug: topic.children[i].nodeSlug,
                             lang: options.lang
                         }), cb, baseSlug);
                     break;
-                case "Article":
                 case "Video":
-                    loadContentClarifs(topic.children[i], topic.relative_url,
-                        cb, baseSlug);
+                    loadVideoClarifs(topic.children[i], cb, baseSlug, topic
+                        .relativeUrl);
+                    break;
+                case "Article":
+                    loadContentClarifs(topic.children[i], cb, baseSlug, topic
+                        .relativeUrl, topic.children[i].internalId);
             }
         }
     }
@@ -307,20 +345,28 @@
         addActiveRequests(1, baseSlug);
         $.getJSON({
             url: url,
+            data: {
+                lang: "en",
+                casing: "camel"
+            },
             dataType: "jsonp"
         }).done(function(data, status) {
             addActiveRequests(-1, baseSlug);
+            
             if (status === "success") {
                 if (typeof baseSlug !== "string") {
-                    baseSlug = data.node_slug;
+                    baseSlug = data.nodeSlug;
                 }
+                
                 switch (data.kind) {
                     case "Topic":
                         loadTopicClarifs(data, cb, baseSlug);
                         break;
                     case "Video":
+                        loadVideoClarifs(data, cb, baseSlug);
+                        break;
                     case "Article":
-                        loadContentClarifs(data, cb);
+                        loadContentClarifs(data, cb, baseSlug, data.internalId);
                 }
             } else {
                 addFailedRequest();
@@ -383,9 +429,7 @@
                     }
                 }
                 
-                
                 cache[slug].push.apply(cache[slug], clarifs);
-                
                 
                 if (activeSlug === slug) {
                     $clarifsHeader.text("Clarifications in " +
@@ -420,10 +464,10 @@
                     (
                         (clarif.contentKind === "article" && $articlesToggle
                             .is(":checked")) ||
-                        (clarif.contentKind === "article" && $articlesToggle
+                        (clarif.contentKind === "video" && $videosToggle
                             .is(":checked"))
                     ) &&
-                    clarif.focusUrl.indexOf(filterPath) === 0
+                    clarif.topicUrl.indexOf(filterPath) === 0
                 );
     }
     
@@ -509,10 +553,10 @@
         $loaderPending = $(".num-pending");
         $failedNum = $(".num-failed");
         $articlesToggle = $("#articles-toggle");
-        $videosToggle = $("videos-toggle");
+        $videosToggle = $("#videos-toggle");
         
         options.lang = ((typeof options.lang === "string" &&
-            options.lang.length > 0) ? options.lang : "www")
+            options.lang.length > 0) ? options.lang : "en")
             .replace(/[^a-z]/i, "").toLowerCase();
         
         $(".filter-controls-form :input").change(function() {
