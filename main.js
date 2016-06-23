@@ -113,7 +113,40 @@
         clarifications: "/api/internal/discussions/{{type}}/{{id}}/clarifications"
     };
     
-    var languages = ["en", "es", "pt", "fr", "tr", "nb", "hi"];
+    var languages = [
+        ["en", "English"],
+        ["es", "Spanish"],
+        ["pt", "Portugese"],
+        ["fr", "French"],
+        ["tr", "Turkish"],
+        ["nb", "Norwegian Bokmål"],
+        ["hi", "Hindi"],
+        ["id", "Indonesian"],
+        ["ms", "Malay"],
+        ["cs", "Czech"],
+        ["da", "Danish"],
+        ["de", "German"],
+        ["xh", "Xhosa"],
+        ["it", "Italian"],
+        ["nl", "Dutch"],
+        ["pl", "Polish"],
+        ["el", "Greek"],
+        ["bg", "Bulgarian"],
+        ["mn", "Mongolian"],
+        ["ru", "Russian"],
+        ["sr", "Serbian"],
+        ["uk", "Ukranian"],
+        ["hy", "Armenian"],
+        ["he", "Hebrew"],
+        ["ur", "Urdu"],
+        ["ar", "Arabic"],
+        ["fa", "Persian (Farsi)"],
+        ["bn", "Bengali"],
+        ["te", "Telugu"],
+        ["th", "Thai"],
+        ["zh-hans", "Simplified Chinese"],
+        ["ja", "Japanese"]
+    ];
     // (Joshua): I couldn't find any public call to the KA API that could get
     //  all of the top level slugs in a reasonable amount of time so I just
     //  hardcoded them here. The top-level slugs are unlikely to change very
@@ -526,9 +559,10 @@
     function createLanguageOption(lang) {
         return $("<a>")
             .attr("href", "javascript: void(0);")
-            .text(lang)
+            .attr("title", lang[1])
+            .text(lang[0])
             .click(function() {
-                changeLang(lang);
+                changeLang(lang[0]);
             })
             .addClass("language-selection-option");
     }

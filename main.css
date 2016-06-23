@@ -29,7 +29,7 @@
     overflow-x: hidden;
     position: absolute;
     top: 3em;
-    bottom: 9em;
+    bottom: 12em;
     width: 100%;
 }
 
@@ -224,7 +224,7 @@
     bottom: 2em;
     left: 0;
     width: 100%;
-    height: 7em;
+    height: 10em;
     background-color: #4CAF50;
     overflow-x: hidden;
 }
@@ -249,6 +249,10 @@
     text-align: center;
     text-decoration: none;
     color: #FFF;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-top: -0.3em;
 }
 
 .language-selection-option:nth-child(odd) {
