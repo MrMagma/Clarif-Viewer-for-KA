@@ -145,7 +145,9 @@
         ["te", "Telugu"],
         ["th", "Thai"],
         ["zh-hans", "Simplified Chinese"],
-        ["ja", "Japanese"]
+        ["ja", "Japanese"],
+        ["ko", "Korean"],
+        ["ka", "Georgian"]        
     ];
     // (Joshua): I couldn't find any public call to the KA API that could get
     //  all of the top level slugs in a reasonable amount of time so I just
