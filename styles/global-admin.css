@@ -1,0 +1,28 @@
+.cvka-nav-el:hover {
+    text-decoration: none;
+}
+
+.cvka-profile-image {
+    height: 4em;
+}
+
+.content {
+    margin-top: 1em;
+}
+
+.tabs > .indicator {
+    background-color: #000;
+}
+
+.cvka-clarif-tag {
+    padding: 0.3em 0.5em;
+    border-radius: 1em;
+    text-align: center;
+    margin: 0 0.2em;
+}
+
+.cvka-delete-icon:hover {
+    /* Materialize uses !important, so we have to as well to override their's */
+    color: #F44336 !important;
+    transition: color 0.3s ease !important;
+}

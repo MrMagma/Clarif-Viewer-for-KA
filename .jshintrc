@@ -1,0 +1,15 @@
+{
+    "esversion": 6,
+    "forin": true,
+    "freeze": true,
+    "predef": ["Materialize", "$"],
+    "latedef": true,
+    "nonbsp": true,
+    "shadow": false,
+    "singleGroups": true,
+    "undef": true,
+    "unused": true,
+    "varstmt": true,
+    "eqnull": true,
+    "browser": true
+}

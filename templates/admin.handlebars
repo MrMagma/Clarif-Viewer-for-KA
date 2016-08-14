@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {{> head}}
+        <link rel="stylesheet" type="text/css" href="./dist/styles/admin.css">
+    </head>
+    <body>
+        <nav class="white">
+            <div class="nav-wrapper">
+                <ul class="right">
+                    <li><a class="cvka-nav-el js-auth-btn black-text" href="javascript: void(0);">Log In/Out</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="content">
+            <div class="row">
+                <div class="col s4 offset-s4">
+                    {{> tab-bar}}
+                </div>
+                <div id="users-tab" class="col s12">
+                    {{> users-tab}}
+                </div>
+                <div id="tags-tab" class="col s12">
+                    {{> tags-tab}}
+                </div>
+            </div>
+        </div>
+        {{> scripts}}
+        <script src="dist/scripts/admin.js"></script>
+    </body>
+</html>
