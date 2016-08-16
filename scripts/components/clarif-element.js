@@ -43,10 +43,12 @@ class ClarifElement {
                     .addClass("cvka-clarif-slug")
                     .append(
                         $("<a>")
-                            .attr("href",
-                                formatString(url, {
+                            .attr({
+                                href: formatString(url, {
                                     lang: page.getParam("lang")
-                                }))
+                                }),
+                                target: "_blank"
+                            })
                             .addClass("cvka-clarif-slug-link")
                             .text(clarif.path)
                     )

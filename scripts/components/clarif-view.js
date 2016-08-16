@@ -83,17 +83,6 @@ class ClarifView {
 
 function filterClarifs(clarif) {
     for (let key in data.filters) {
-        // if (clarif[key].constructor === Array) {
-        //     for (let val of clarif[key]) {
-        //         if (data.filters[key].indexOf(val) !== -1) {
-        //             return true;
-        //         }
-        //     }
-        //     
-        //     return false;
-        // } else if (data.filters[key].indexOf(clarif[key]) === -1) {
-        //     return false;
-        // }
         if (data.filters.hasOwnProperty(key)) {
             if (!data.filters[key](clarif)) {
                 return false;
