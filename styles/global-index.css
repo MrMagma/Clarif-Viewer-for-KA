@@ -122,8 +122,7 @@ a:hover {
 }
 
 .cvka-language-select-label {
-    line-height: 3em;
-    height: 3em;
+    margin-top: 0.75em;
 }
 
 .cvka-language-select-label.cvka-language-select-label-left {
@@ -245,4 +244,8 @@ a:hover {
 
 .cvka-counter {
     margin-left: 0.5em;
+}
+
+.select-wrapper {
+    background: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, #FFFFFF 15%, #FFFFFF 85%, rgba(0, 0, 0, 0) 100%);
 }
