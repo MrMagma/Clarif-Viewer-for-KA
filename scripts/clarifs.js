@@ -37,7 +37,8 @@ function sendReq({url, cb, fail = () => {}, end = () => {}}) {
             url: url,
             data: {
                 casing: "camel",
-                lang: page.getParam("lang")
+                lang: page.getParam("lang"),
+                _: (new Date()).getTime()
             }
         }).done((...args) => {
             cb.apply(cb, args);
