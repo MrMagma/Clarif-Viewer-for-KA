@@ -1,12 +1,11 @@
-import data from "./data.js";
-import fb from "./fb-wrapper.js";
-import utils from "./utils.js";
-import page from "./page.js";
-import events from "./events.js";
-import EventEmitter from "./event-emitter.js";
-
-const MAX_BATCH_SIZE = 10;
-const MAX_ACTIVE_REQUESTS = 25;
+import data from "../data.js";
+import fb from "../fb-wrapper.js";
+import utils from "../utils.js";
+import page from "../page.js";
+import events from "../events/events.js";
+import EventEmitter from "../events/event-emitter.js";
+import getTree from "./tree/get-tree.js";
+import trees from "./tree/trees.js";
 
 let {formatString, fbValToArray} = utils,
     {db} = data;
@@ -24,7 +23,7 @@ let requests = {
 };
 
 function sendReq({url, cb, fail = () => {}, end = () => {}}) {
-    if (requests.active > MAX_ACTIVE_REQUESTS) {
+    if (requests.active > data.MAX_ACTIVE_REQUESTS) {
         setTimeout(sendReq.bind(sendReq, {
             url: url,
             cb: cb,
@@ -50,22 +49,6 @@ function sendReq({url, cb, fail = () => {}, end = () => {}}) {
             requests.active--;
         });
     }
-}
-
-let trees = {};
-let topSlugMap = {};
-fb.db.ref("/content_tree/slug_map").once("value", (snapshot) => {
-    topSlugMap = snapshot.val();
-});
-
-function getTree(slug, cb) {
-    // Set an in-progress status somewhere
-    fb.db.ref(`/content_tree/children/${topSlugMap[slug]}`)
-        .once("value", (snapshot) => {
-            trees[slug] = snapshot.val();
-            events.fire("tree-loaded", slug, trees[slug]);
-            cb(trees[slug]);
-        });
 }
 
 function mapClarifs(contentKind, lang, tagList, relUrl, clarif) {
@@ -222,7 +205,7 @@ class Loader extends EventEmitter {
     }
     addToBatch(clarifs) {
         this.batch.push.apply(this.batch, clarifs);
-        if (this.batch.length >= MAX_BATCH_SIZE ||
+        if (this.batch.length >= data.MAX_BATCH_SIZE ||
             this.status.activeRequests <= 1) {
             this.fire("clarifs-loaded", this.batch);
             this.batch = [];

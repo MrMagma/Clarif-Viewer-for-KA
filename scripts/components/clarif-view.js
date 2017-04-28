@@ -1,6 +1,6 @@
 import ClarifElement from "./clarif-element.js";
-import events from "../events.js";
-import EventEmitter from "../event-emitter.js";
+import events from "../events/events.js";
+import EventEmitter from "../events/event-emitter.js";
 import gData from "../data.js";
 import page from "../page.js";
 

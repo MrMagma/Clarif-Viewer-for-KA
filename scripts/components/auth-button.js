@@ -1,4 +1,4 @@
-import events from "../events.js";
+import events from "../events/events.js";
 import fb from "../fb-wrapper.js";
 import util from "../utils.js";
 

@@ -1,6 +1,6 @@
 import SlugTree from "./slug-tree.js";
-import clarifs from "../clarifs.js";
-import events from "../events.js";
+import clarifs from "../api/clarifs.js";
+import events from "../events/events.js";
 
 const DEFAULT_COLOR = "#555555";
 

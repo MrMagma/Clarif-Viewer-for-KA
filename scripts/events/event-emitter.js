@@ -1,5 +1,5 @@
 import events from "events";
-import utils from "./utils.js";
+import utils from "../utils.js";
 
 let {uid} = utils;
 

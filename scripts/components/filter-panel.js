@@ -2,7 +2,7 @@ import SelectGroup from "./select-group.js";
 import page from "../page.js";
 import data from "../data.js";
 import fb from "../fb-wrapper.js";
-import events from "../events.js";
+import events from "../events/events.js";
 import util from "../utils.js";
 
 class FilterPanel {

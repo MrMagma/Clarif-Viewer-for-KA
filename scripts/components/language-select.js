@@ -1,6 +1,6 @@
 import fb from "../fb-wrapper.js";
 import page from "../page.js";
-import events from "../events.js";
+import events from "../events/events.js";
 
 events.fire("filter-changed", {
     language: (clarif) => {

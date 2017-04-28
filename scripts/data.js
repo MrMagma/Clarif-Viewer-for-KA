@@ -41,6 +41,8 @@ export default {
     ],
     KA_URL: "https://{{lang}}.khanacademy.org",
     API_PATH: "https://{{lang}}.khanacademy.org/api",
+    MAX_BATCH_SIZE: 10,
+    MAX_ACTIVE_REQUESTS: 25,
     apiSlugs: {
         topic: "/v1/topic/{{topicSlug}}",
         clarifications: "/internal/discussions/{{type}}/{{id}}/clarifications"

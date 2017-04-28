@@ -1,6 +1,6 @@
 import {tag as tagCreator} from "./creators.js";
-import events from "../events.js";
-import EventEmitter from "../event-emitter.js";
+import events from "../events/events.js";
+import EventEmitter from "../events/event-emitter.js";
 import fb from "../fb-wrapper.js";
 
 let data = {

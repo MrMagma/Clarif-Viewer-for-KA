@@ -1,6 +1,6 @@
 import fb from "./fb-wrapper.js";
 import AuthButton from "./components/auth-button.js";
-import events from "./events.js";
+import events from "./events/events.js";
 import {tag as tagCreator} from "./components/creators.js";
 
 let $usersTable, permissions = null, permissionsData = null, tags = null;

@@ -1,4 +1,4 @@
-import EventEmitter from "../event-emitter.js";
+import EventEmitter from "../events/event-emitter.js";
 
 class SelectGroup extends EventEmitter {
     constructor(domSelector, cfg) {
