@@ -4,7 +4,7 @@ import utils from "../utils.js";
 import page from "../page.js";
 import events from "../events/events.js";
 import EventEmitter from "../events/event-emitter.js";
-import getTree from "./tree/get-tree-no-fb.js";
+import getTree from "./tree/get-tree.js";
 import trees from "./tree/trees.js";
 
 let {formatString, fbValToArray} = utils,
