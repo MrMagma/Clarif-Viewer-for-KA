@@ -45,6 +45,7 @@ export default {
     MAX_ACTIVE_REQUESTS: 25,
     apiSlugs: {
         topic: "/v1/topic/{{topicSlug}}",
+        video: "/v1/videos/{{videoSlug}}",
         clarifications: "/internal/discussions/{{type}}/{{id}}/clarifications"
     }
 };

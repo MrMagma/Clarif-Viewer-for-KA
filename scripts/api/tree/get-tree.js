@@ -8,7 +8,7 @@ fb.db.ref("/content_tree/slug_map").once("value", (snapshot) => {
 });
 
 export default function getTree(slug, cb) {
-    // Set an in-progress status somewhere
+    // TODO: Set an in-progress status somewhere
     fb.db.ref(`/content_tree/children/${topSlugMap[slug]}`)
         .once("value", (snapshot) => {
             trees[slug] = snapshot.val();
