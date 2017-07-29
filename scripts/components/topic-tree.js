@@ -1,80 +1,40 @@
 import SlugTree from "./slug-tree.js";
 import clarifs from "../api/clarifs.js";
 import events from "../events/events.js";
-
-const DEFAULT_COLOR = "#555555";
+import page from "../page.js";
+// import {slugSort} from "../data.js"
+import a from "../data.js";
+let slugSort = a.slugSort;
 
 let $clarifStatus = $(".js-clarifs-status")
     .css("display", "none");
 let $filterTopic = $(".js-filter-topic");
 
-let slugData = [
-    {
-        title: "Math",
-        color: "#1C758A",
-        slug: "math"
-    },
-    {
-        title: "Science",
-        color: "#94424F",
-        slug: "science"
-    },
-    {
-        title: "Economics and Finance",
-        color: "#B77033",
-        slug: "economics-finance-domain"
-    },
-    {
-        title: "Arts and Humanities",
-        color: "#AD3434",
-        slug: "humanities"
-    },
-    {
-        title: "Computing",
-        color: "#437A39",
-        slug: "computing"
-    },
-    {
-        title: "Test Prep",
-        color: "#644172",
-        slug: "test-prep"
-    },
-    {
-        title: "Partner Content",
-        color: "#218270",
-        slug: "partner-content"
-    },
-    {
-        title: "College Admissions",
-        color: DEFAULT_COLOR,
-        slug: "college-admissions"
-    },
-    {
-        title: "Talks and Interviews",
-        color: DEFAULT_COLOR,
-        slug: "talks-and-interviews"
-    },
-    {
-        title: "Coach Resources",
-        color: DEFAULT_COLOR,
-        slug: "coach-res"
-    }
-];
-
 let data = {
     slugTrees: {},
-    init() {
-        for (let slug of slugData) {
-            this.slugTrees[slug.slug] = new SlugTree({
+};
+
+events.on("slug-data-loaded", (slugData) => {
+    data.slugTrees[page.getParam("lang")] = [];
+    
+    for (let key in slugData) {
+        if (slugData.hasOwnProperty(key)) {
+            let slug = slugData[key];
+            data.slugTrees[page.getParam("lang")].push(new SlugTree({
                 className: "cvka-top-level-slug white-text",
                 style: {
                     backgroundColor: slug.color
                 },
-                ...slug
-            });
+                slug: key,
+                title: slug.title
+            }));
         }
     }
-};
+    
+    data.slugTrees[page.getParam("lang")] =
+        data.slugTrees[page.getParam("lang")].sort((a, b) =>
+            slugSort[a.slug] - slugSort[b.slug]);
+});
 
 function applyContentTree(slugTree, contentTree) {
     for (let child of contentTree.children) {
@@ -92,7 +52,11 @@ function applyContentTree(slugTree, contentTree) {
 }
 
 events.on("tree-loaded", (slug, tree) => {
-    applyContentTree(data.slugTrees[slug], tree);
+    let langTrees = data.slugTrees[page.getParam("lang")];
+    for (var i = 0; i < langTrees.length; ++i) {
+        if (langTrees[i].slug === slug) break;
+    }
+    applyContentTree(data.slugTrees[page.getParam("lang")][i], tree);
 });
 
 let selectedPath = [];
@@ -121,14 +85,10 @@ class TopicTree extends SlugTree {
         this.$domNode = $(domSelector);
         
         this.$nameEl.css("display", "none");
-        for (let slug in data.slugTrees) {
-            if (data.slugTrees.hasOwnProperty(slug)) {
-                this.addChild(data.slugTrees[slug]);
-            }
-        }
         
         this.on("child-selected", this.onChildSelect.bind(this));
         events.on("clarifs-added", this.updateCounters.bind(this));
+        events.on("slug-data-loaded", this.updateTree.bind(this));
     }
     onChildSelect(path) {
         selectedPath = path;
@@ -149,8 +109,13 @@ class TopicTree extends SlugTree {
             } while(path.length > 0);
         }
     }
+    updateTree() {
+        this.clear();
+        
+        for (let slugTree of data.slugTrees[page.getParam("lang")]) {
+            this.addChild(slugTree);
+        }
+    }
 }
-
-data.init();
 
 export default TopicTree;

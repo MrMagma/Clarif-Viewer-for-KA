@@ -32,6 +32,15 @@ class SlugTree extends EventEmitter {
         this.on("child-selected", this.handleChildSelect.bind(this));
         this.$domNode.append(this.children.map(child => child.$domNode));
     }
+    clear() {
+        for (let child of this.children) {
+            child.destroy();
+        }
+        this.children = [];
+    }
+    destroy() {
+        this.$domNode.remove();
+    }
     setTitle(title) {
         this.title = title;
         this.$nameEl.text(title);

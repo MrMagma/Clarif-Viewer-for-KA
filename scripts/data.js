@@ -47,5 +47,19 @@ export default {
         topic: "/v1/topic/{{topicSlug}}",
         video: "/v1/videos/{{videoSlug}}",
         clarifications: "/internal/discussions/{{type}}/{{id}}/clarifications"
+    },
+    slugSort: {
+        "college-careers-more": 7,
+        "computing": 4,
+        "economics-finance-domain": 2,
+        "humanities": 3,
+        "mappers": 10,
+        "math": 0,
+        "partner-content": 6,
+        "resources": 9,
+        "science": 1,
+        "talent-search": 11,
+        "talks-and-interviews": 8,
+        "test-prep": 5
     }
 };

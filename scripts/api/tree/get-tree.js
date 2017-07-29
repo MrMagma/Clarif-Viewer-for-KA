@@ -1,15 +1,12 @@
 import fb from "../../fb-wrapper.js";
 import events from "../../events/events.js";
 import trees from "./trees.js";
-
-let topSlugMap = {};
-fb.db.ref("/content_tree/slug_map").once("value", (snapshot) => {
-    topSlugMap = snapshot.val();
-});
+import page from "../../page.js";
+import slugData from "./slug-data.js";
 
 export default function getTree(slug, cb) {
     // TODO: Set an in-progress status somewhere
-    fb.db.ref(`/content_tree/children/${topSlugMap[slug]}`)
+    fb.db.ref(`/content_trees/${page.getParam("lang")}/children/${slugData[page.getParam("lang")][slug].child_index}`)
         .once("value", (snapshot) => {
             trees[slug] = snapshot.val();
             events.fire("tree-loaded", slug, trees[slug]);

@@ -1,4 +1,3 @@
-import fb from "../../fb-wrapper.js";
 import events from "../../events/events.js";
 import trees from "./trees.js";
 import data from "../../data.js";
@@ -6,11 +5,6 @@ import utils from "../../utils.js";
 import page from "../../page.js";
 
 let {formatString: format} = utils;
-
-let topSlugMap = {};
-fb.db.ref("/content_tree/slug_map").once("value", (snapshot) => {
-    topSlugMap = snapshot.val();
-});
 
 function getRealVideoSlug(slug, cb) {
     $.getJSON({

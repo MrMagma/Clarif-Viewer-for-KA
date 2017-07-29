@@ -27,6 +27,9 @@ class LanguageSelect {
                 .text(lang.name)));
         
         this.$domNode.material_select();
+        
+        events.fire("lang-changed");
+        events.fire("filter-changed");
     }
     handleLangChange(evt) {
         page.setParam("lang", evt.currentTarget.selectedOptions[0].value);
