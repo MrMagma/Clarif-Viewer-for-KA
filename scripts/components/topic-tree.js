@@ -103,9 +103,15 @@ class TopicTree extends SlugTree {
         for (let {parentSlug: path} of clarifs) {
             path = path.slice(1, path.length).split("/");
             let child = this;
+            
             do {
                 child.incrementCounter();
+                
                 child = child.getChildBySlug(path.shift());
+                
+                if (child == null) {
+                    break;
+                }
             } while(path.length > 0);
         }
     }

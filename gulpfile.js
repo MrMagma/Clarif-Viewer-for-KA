@@ -37,8 +37,7 @@ gulp.task("build-js", ["del-js"], function(done) {
 
         var tasks = files.map(function(entry) {
             var babelCfg = {
-                // compact: true,
-                compact: false,
+                compact: true,
                 comments: false
             };
 
@@ -54,7 +53,7 @@ gulp.task("build-js", ["del-js"], function(done) {
                 .bundle()
                 .pipe(source(rename))
                 .pipe(buffer())
-                // .pipe(uglify())
+                .pipe(uglify())
                 .pipe(gulp.dest("./dist/scripts"));
         });
 
