@@ -39,14 +39,14 @@ class SelectGroup extends EventEmitter {
             .addClass("row")
             .append(
                 $("<div>")
-                    .addClass("col s4")
+                    .addClass("col s6")
                     .append(
                         $("<p>")
                             .addClass("cvka-select-label right-align")
                             .text(cfg.label || cfg.name)
                     ),            
                 $("<div>")
-                    .addClass("col s4")
+                    .addClass("col s6")
                     .append(
                         $select
                     )

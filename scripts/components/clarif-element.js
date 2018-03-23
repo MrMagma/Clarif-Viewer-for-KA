@@ -52,6 +52,11 @@ class ClarifElement {
                             .addClass("cvka-clarif-slug-link")
                             .text(clarif.path)
                     )
+                    .append(
+                        $("<span>")
+                            .addClass("cvka-clarif-date")
+                            .text(` (${(new Date(clarif.epoch)).toDateString().slice(4, Infinity)})`)
+                    )
             );
         this.$tags = $("<div>")
             .addClass("cvka-clarif-tags-container");

@@ -1,4 +1,5 @@
 import SelectGroup from "./select-group.js";
+import DateRange from "./date-range.js";
 import page from "../page.js";
 import data from "../data.js";
 import fb from "../fb-wrapper.js";
@@ -16,6 +17,7 @@ class FilterPanel {
         });
         
         this.sort = new SelectGroup(this.$domNode);
+        this.range = new DateRange(this.$domNode);
         
         this.sort.set([
             {
