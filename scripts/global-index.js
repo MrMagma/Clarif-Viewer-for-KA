@@ -5,6 +5,7 @@ import events from "./events/events.js";
 import fb from "./fb-wrapper.js";
 import FilterPanel from "./components/filter-panel.js";
 import LanguageSelect from "./components/language-select.js";
+import LoadButton from "./components/load-button.js";
 import page from "./page.js";
 import TagModal from "./components/tag-modal.js";
 import TopicTree from "./components/topic-tree.js";
@@ -49,6 +50,7 @@ function onDataLoad(tags) {
                 noAuth: "<span class='cvka-auth-message'>Hello Guest, click here to log in.</span>"
             }
         });
+        new LoadButton(".js-load-btn");
         
         let $failedRequests = $(".js-failed-requests");
         let $pendingRequests = $(".js-pending-requests");

@@ -2,7 +2,7 @@ import EventEmitter from "../events/event-emitter.js";
 
 class SlugTree extends EventEmitter {
     constructor(cfg = {}) {
-        let {title, slug = title, path = slug, className = "", style = {},
+        let {title, slug, path = "/", className = "", style = {},
             parent = null, children = []} = cfg;
         super();
         this.parent = parent;
@@ -66,6 +66,7 @@ class SlugTree extends EventEmitter {
         return null;
     }
     getChildAtPath(path) {
+        path = JSON.parse(JSON.stringify(path));
         if (typeof path === "string") {
             path = path.split("/");
         }
@@ -80,11 +81,10 @@ class SlugTree extends EventEmitter {
     }
     handleClick(evt) {
         evt.stopPropagation();
-        this.handleChildSelect([]);
+        this.handleChildSelect(this.path.split("/").slice(1, Infinity));
     }
     handleChildSelect(path) {
         if (this.parent != null) {
-            path.unshift(this.slug);
             this.parent.fire("child-selected", path);
         } else {
             this.resetChildren();
@@ -100,10 +100,10 @@ class SlugTree extends EventEmitter {
     activatePath(path) {
         let child = this;
         child.setActive(true);
-        do {
+        while (path.length > 0) {
             child = child.getChildBySlug(path.shift());
             child.setActive(true);
-        } while (path.length > 0);
+        }
     }
     setActive(active) {
         this.$domNode.removeClass("active");

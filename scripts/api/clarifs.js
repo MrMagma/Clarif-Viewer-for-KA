@@ -68,6 +68,23 @@ function mapClarifs(contentKind, lang, tagList, relUrl, clarif) {
     };
 }
 
+function getSubtree(path) {
+    let tree = trees[path.shift()];
+    
+    while (path.length) {
+        let slug = path.shift();
+        
+        for (let subtree of tree.children) {
+            if (subtree.slug === slug) {
+                tree = subtree;
+                break;
+            }
+        }
+    }
+    
+    return tree;
+}
+
 class Loader extends EventEmitter {
     constructor(lang) {
         super();
@@ -85,34 +102,34 @@ class Loader extends EventEmitter {
             message: ""
         };
     }
-    load(slug) {
-        if (this.loadStarted[slug]) {
-            return;
+    load(path) {
+        path = path.split("/");
+        
+        for (let slug of path) {
+            if (this.loadStarted[slug]) {
+                return;
+            }
         }
         
-        this.loadStarted[slug] = true;
+        this.loadStarted[path[path.length - 1]] = true;
         
-        fb.db.ref(`/tagged_clarifs/${slug}`).once("value", (snapshot) => {
+        fb.db.ref(`/tagged_clarifs/${path[0]}`).once("value", (snapshot) => {
             let _tags = snapshot.val();
             for (let key in _tags) {
                 _tags[key] = fbValToArray(_tags[key]);
             }
             this._tags = _tags;
             
-            if (!trees[slug]) {
-                getTree(slug, this.loadTreeClarifs.bind(this));
-            } else {
-                this.loadTreeClarifs(trees[slug]);
-            }
+            this.loadTreeClarifs(getSubtree(path));
         });
     }
     loadTreeClarifs(tree) {
-        for (let child of tree.children) {
-            if (child.hasOwnProperty("children")) {
+        if (tree.hasOwnProperty("children")) {
+            for (let child of tree.children) {
                 this.loadTreeClarifs(child);
-            } else {
-                this.loadTopicClarifs(child);
             }
+        } else {
+            this.loadTopicClarifs(tree);
         }
     }
     loadTopicClarifs(topic) {
@@ -219,7 +236,7 @@ class Loader extends EventEmitter {
 let loader = new Loader(page.getParam("lang"));
 
 export default {
-    load(slug) {
+    load(path) {
         if (page.getParam("lang") !== loader.lang) {
             loader = new Loader(page.getParam("lang"));
             events.fire("clarifs-reset");
@@ -232,10 +249,6 @@ export default {
             events.fire("status-changed", loader.status);
         });
         
-        loader.load(slug);
-    },
-    loadStarted(slug) {
-        return page.getParam("lang") === loader.lang &&
-            !!loader.loadStarted[slug];
+        loader.load(path);
     }
 };

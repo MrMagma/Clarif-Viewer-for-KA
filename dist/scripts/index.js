@@ -1169,6 +1169,44 @@ function mapClarifs(contentKind, lang, tagList, relUrl, clarif) {
     };
 }
 
+function getSubtree(path) {
+    var tree = _trees2.default[path.shift()];
+
+    while (path.length) {
+        var slug = path.shift();
+
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = tree.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var subtree = _step.value;
+
+                if (subtree.slug === slug) {
+                    tree = subtree;
+                    break;
+                }
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+    }
+
+    return tree;
+}
+
 var Loader = function (_EventEmitter) {
     _inherits(Loader, _EventEmitter);
 
@@ -1194,59 +1232,80 @@ var Loader = function (_EventEmitter) {
 
     _createClass(Loader, [{
         key: "load",
-        value: function load(slug) {
+        value: function load(path) {
             var _this2 = this;
 
-            if (this.loadStarted[slug]) {
-                return;
+            path = path.split("/");
+
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = path[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var slug = _step2.value;
+
+                    if (this.loadStarted[slug]) {
+                        return;
+                    }
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
             }
 
-            this.loadStarted[slug] = true;
+            this.loadStarted[path[path.length - 1]] = true;
 
-            _fbWrapper2.default.db.ref("/tagged_clarifs/" + slug).once("value", function (snapshot) {
+            _fbWrapper2.default.db.ref("/tagged_clarifs/" + path[0]).once("value", function (snapshot) {
                 var _tags = snapshot.val();
                 for (var key in _tags) {
                     _tags[key] = fbValToArray(_tags[key]);
                 }
                 _this2._tags = _tags;
 
-                if (!_trees2.default[slug]) {
-                    (0, _getTree2.default)(slug, _this2.loadTreeClarifs.bind(_this2));
-                } else {
-                    _this2.loadTreeClarifs(_trees2.default[slug]);
-                }
+                _this2.loadTreeClarifs(getSubtree(path));
             });
         }
     }, {
         key: "loadTreeClarifs",
         value: function loadTreeClarifs(tree) {
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
+            if (tree.hasOwnProperty("children")) {
+                var _iteratorNormalCompletion3 = true;
+                var _didIteratorError3 = false;
+                var _iteratorError3 = undefined;
 
-            try {
-                for (var _iterator = tree.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var child = _step.value;
-
-                    if (child.hasOwnProperty("children")) {
-                        this.loadTreeClarifs(child);
-                    } else {
-                        this.loadTopicClarifs(child);
-                    }
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
                 try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
+                    for (var _iterator3 = tree.children[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                        var child = _step3.value;
+
+                        this.loadTreeClarifs(child);
                     }
+                } catch (err) {
+                    _didIteratorError3 = true;
+                    _iteratorError3 = err;
                 } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
+                    try {
+                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                            _iterator3.return();
+                        }
+                    } finally {
+                        if (_didIteratorError3) {
+                            throw _iteratorError3;
+                        }
                     }
                 }
+            } else {
+                this.loadTopicClarifs(tree);
             }
         }
     }, {
@@ -1265,13 +1324,13 @@ var Loader = function (_EventEmitter) {
                 }),
                 cb: function cb(data, status) {
                     if (status === "success") {
-                        var _iteratorNormalCompletion2 = true;
-                        var _didIteratorError2 = false;
-                        var _iteratorError2 = undefined;
+                        var _iteratorNormalCompletion4 = true;
+                        var _didIteratorError4 = false;
+                        var _iteratorError4 = undefined;
 
                         try {
-                            for (var _iterator2 = data.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                                var child = _step2.value;
+                            for (var _iterator4 = data.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                                var child = _step4.value;
 
                                 switch (child.kind) {
                                     case "Video":
@@ -1283,16 +1342,16 @@ var Loader = function (_EventEmitter) {
                                 }
                             }
                         } catch (err) {
-                            _didIteratorError2 = true;
-                            _iteratorError2 = err;
+                            _didIteratorError4 = true;
+                            _iteratorError4 = err;
                         } finally {
                             try {
-                                if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                                    _iterator2.return();
+                                if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                                    _iterator4.return();
                                 }
                             } finally {
-                                if (_didIteratorError2) {
-                                    throw _iteratorError2;
+                                if (_didIteratorError4) {
+                                    throw _iteratorError4;
                                 }
                             }
                         }
@@ -1386,7 +1445,7 @@ var Loader = function (_EventEmitter) {
 var loader = new Loader(_page2.default.getParam("lang"));
 
 exports.default = {
-    load: function load(slug) {
+    load: function load(path) {
         if (_page2.default.getParam("lang") !== loader.lang) {
             loader = new Loader(_page2.default.getParam("lang"));
             _events2.default.fire("clarifs-reset");
@@ -1399,14 +1458,11 @@ exports.default = {
             _events2.default.fire("status-changed", loader.status);
         });
 
-        loader.load(slug);
-    },
-    loadStarted: function loadStarted(slug) {
-        return _page2.default.getParam("lang") === loader.lang && !!loader.loadStarted[slug];
+        loader.load(path);
     }
 };
 
-},{"../data.js":24,"../events/event-emitter.js":25,"../events/events.js":26,"../fb-wrapper.js":27,"../page.js":29,"../utils.js":31,"./tree/get-tree.js":10,"./tree/trees.js":12}],10:[function(require,module,exports){
+},{"../data.js":25,"../events/event-emitter.js":26,"../events/events.js":27,"../fb-wrapper.js":28,"../page.js":30,"../utils.js":32,"./tree/get-tree.js":10,"./tree/trees.js":12}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1444,7 +1500,7 @@ function getTree(slug, cb) {
     });
 }
 
-},{"../../events/events.js":26,"../../fb-wrapper.js":27,"../../page.js":29,"./slug-data.js":11,"./trees.js":12}],11:[function(require,module,exports){
+},{"../../events/events.js":27,"../../fb-wrapper.js":28,"../../page.js":30,"./slug-data.js":11,"./trees.js":12}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1478,7 +1534,7 @@ _events2.default.on("lang-changed", updateSlugMap);
 
 exports.default = slugData;
 
-},{"../../events/events.js":26,"../../fb-wrapper.js":27,"../../page.js":29}],12:[function(require,module,exports){
+},{"../../events/events.js":27,"../../fb-wrapper.js":28,"../../page.js":30}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1601,7 +1657,7 @@ var AuthButton = function () {
 
 exports.default = AuthButton;
 
-},{"../events/events.js":26,"../fb-wrapper.js":27,"../utils.js":31}],14:[function(require,module,exports){
+},{"../events/events.js":27,"../fb-wrapper.js":28,"../utils.js":32}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1695,7 +1751,7 @@ var ClarifElement = function () {
 
 exports.default = ClarifElement;
 
-},{"../data.js":24,"../fb-wrapper.js":27,"../page.js":29,"../utils.js":31,"./creators.js":16}],15:[function(require,module,exports){
+},{"../data.js":25,"../fb-wrapper.js":28,"../page.js":30,"../utils.js":32,"./creators.js":16}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1841,7 +1897,7 @@ function sortClarifs(clarifA, clarifB) {
 
 exports.default = ClarifView;
 
-},{"../data.js":24,"../events/event-emitter.js":25,"../events/events.js":26,"../page.js":29,"./clarif-element.js":14}],16:[function(require,module,exports){
+},{"../data.js":25,"../events/event-emitter.js":26,"../events/events.js":27,"../page.js":30,"./clarif-element.js":14}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1981,7 +2037,7 @@ var DateRange = function () {
 
 exports.default = DateRange;
 
-},{"../events/events.js":26,"../page.js":29}],18:[function(require,module,exports){
+},{"../events/events.js":27,"../page.js":30}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2141,7 +2197,7 @@ var FilterPanel = function () {
 
 exports.default = FilterPanel;
 
-},{"../data.js":24,"../events/events.js":26,"../fb-wrapper.js":27,"../page.js":29,"../utils.js":31,"./date-range.js":17,"./select-group.js":20}],19:[function(require,module,exports){
+},{"../data.js":25,"../events/events.js":27,"../fb-wrapper.js":28,"../page.js":30,"../utils.js":32,"./date-range.js":17,"./select-group.js":21}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2213,7 +2269,75 @@ var LanguageSelect = function () {
 
 exports.default = LanguageSelect;
 
-},{"../events/events.js":26,"../fb-wrapper.js":27,"../page.js":29}],20:[function(require,module,exports){
+},{"../events/events.js":27,"../fb-wrapper.js":28,"../page.js":30}],20:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _eventEmitter = require("../events/event-emitter.js");
+
+var _eventEmitter2 = _interopRequireDefault(_eventEmitter);
+
+var _events = require("../events/events.js");
+
+var _events2 = _interopRequireDefault(_events);
+
+var _clarifs = require("../api/clarifs.js");
+
+var _clarifs2 = _interopRequireDefault(_clarifs);
+
+var _page = require("../page.js");
+
+var _page2 = _interopRequireDefault(_page);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var LoadButton = function (_EventEmitter) {
+    _inherits(LoadButton, _EventEmitter);
+
+    function LoadButton(selector) {
+        _classCallCheck(this, LoadButton);
+
+        var _this = _possibleConstructorReturn(this, (LoadButton.__proto__ || Object.getPrototypeOf(LoadButton)).call(this));
+
+        _this.$btn = $(selector).click(_this.handleClick.bind(_this));
+        _events2.default.on("slug-changed", _this.handleSlugChange.bind(_this));
+
+        if (!_page2.default.getParam("path")) {
+            _this.$btn.attr("disabled", "disabled");
+        }
+        return _this;
+    }
+
+    _createClass(LoadButton, [{
+        key: "handleSlugChange",
+        value: function handleSlugChange() {
+            this.$btn.removeAttr("disabled");
+        }
+    }, {
+        key: "handleClick",
+        value: function handleClick() {
+            this.$btn.attr("disabled", "disabled");
+            _clarifs2.default.load(_page2.default.getParam("path"));
+        }
+    }]);
+
+    return LoadButton;
+}(_eventEmitter2.default);
+
+exports.default = LoadButton;
+
+},{"../api/clarifs.js":9,"../events/event-emitter.js":26,"../events/events.js":27,"../page.js":30}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2341,7 +2465,7 @@ var SelectGroup = function (_EventEmitter) {
 
 exports.default = SelectGroup;
 
-},{"../events/event-emitter.js":25}],21:[function(require,module,exports){
+},{"../events/event-emitter.js":26}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2371,10 +2495,9 @@ var SlugTree = function (_EventEmitter) {
         _classCallCheck(this, SlugTree);
 
         var title = cfg.title,
-            _cfg$slug = cfg.slug,
-            slug = _cfg$slug === undefined ? title : _cfg$slug,
+            slug = cfg.slug,
             _cfg$path = cfg.path,
-            path = _cfg$path === undefined ? slug : _cfg$path,
+            path = _cfg$path === undefined ? "/" : _cfg$path,
             _cfg$className = cfg.className,
             className = _cfg$className === undefined ? "" : _cfg$className,
             _cfg$style = cfg.style,
@@ -2507,6 +2630,7 @@ var SlugTree = function (_EventEmitter) {
     }, {
         key: "getChildAtPath",
         value: function getChildAtPath(path) {
+            path = JSON.parse(JSON.stringify(path));
             if (typeof path === "string") {
                 path = path.split("/");
             }
@@ -2523,13 +2647,12 @@ var SlugTree = function (_EventEmitter) {
         key: "handleClick",
         value: function handleClick(evt) {
             evt.stopPropagation();
-            this.handleChildSelect([]);
+            this.handleChildSelect(this.path.split("/").slice(1, Infinity));
         }
     }, {
         key: "handleChildSelect",
         value: function handleChildSelect(path) {
             if (this.parent != null) {
-                path.unshift(this.slug);
                 this.parent.fire("child-selected", path);
             } else {
                 this.resetChildren();
@@ -2570,10 +2693,10 @@ var SlugTree = function (_EventEmitter) {
         value: function activatePath(path) {
             var child = this;
             child.setActive(true);
-            do {
+            while (path.length > 0) {
                 child = child.getChildBySlug(path.shift());
                 child.setActive(true);
-            } while (path.length > 0);
+            }
         }
     }, {
         key: "setActive",
@@ -2595,7 +2718,7 @@ var SlugTree = function (_EventEmitter) {
 
 exports.default = SlugTree;
 
-},{"../events/event-emitter.js":25}],22:[function(require,module,exports){
+},{"../events/event-emitter.js":26}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2813,7 +2936,7 @@ var TagModal = function () {
 
 exports.default = TagModal;
 
-},{"../events/event-emitter.js":25,"../events/events.js":26,"../fb-wrapper.js":27,"./creators.js":16}],23:[function(require,module,exports){
+},{"../events/event-emitter.js":26,"../events/events.js":27,"../fb-wrapper.js":28,"./creators.js":16}],24:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2826,10 +2949,6 @@ var _slugTree = require("./slug-tree.js");
 
 var _slugTree2 = _interopRequireDefault(_slugTree);
 
-var _clarifs = require("../api/clarifs.js");
-
-var _clarifs2 = _interopRequireDefault(_clarifs);
-
 var _events = require("../events/events.js");
 
 var _events2 = _interopRequireDefault(_events);
@@ -2837,6 +2956,10 @@ var _events2 = _interopRequireDefault(_events);
 var _page = require("../page.js");
 
 var _page2 = _interopRequireDefault(_page);
+
+var _getTree = require("../api/tree/get-tree.js");
+
+var _getTree2 = _interopRequireDefault(_getTree);
 
 var _data = require("../data.js");
 
@@ -2852,31 +2975,31 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var slugSort = _data2.default.slugSort;
 
-var $clarifStatus = $(".js-clarifs-status").css("display", "none");
+
+var $clarifStatus = $(".js-clarifs-status");
 var $filterTopic = $(".js-filter-topic");
 
-var data = {
-    slugTrees: {}
-};
+var slugTrees = {};
 
 _events2.default.on("slug-data-loaded", function (slugData) {
-    data.slugTrees[_page2.default.getParam("lang")] = [];
+    slugTrees[_page2.default.getParam("lang")] = [];
 
     for (var key in slugData) {
         if (slugData.hasOwnProperty(key)) {
             var slug = slugData[key];
-            data.slugTrees[_page2.default.getParam("lang")].push(new _slugTree2.default({
+            slugTrees[_page2.default.getParam("lang")].push(new _slugTree2.default({
                 className: "cvka-top-level-slug white-text",
                 style: {
                     backgroundColor: slug.color
                 },
                 slug: key,
+                path: "/" + _data2.default.topicSlugs[slug.child_index],
                 title: slug.title
             }));
         }
     }
 
-    data.slugTrees[_page2.default.getParam("lang")] = data.slugTrees[_page2.default.getParam("lang")].sort(function (a, b) {
+    slugTrees[_page2.default.getParam("lang")] = slugTrees[_page2.default.getParam("lang")].sort(function (a, b) {
         return slugSort[a.slug] - slugSort[b.slug];
     });
 });
@@ -2918,11 +3041,11 @@ function applyContentTree(slugTree, contentTree) {
 }
 
 _events2.default.on("tree-loaded", function (slug, tree) {
-    var langTrees = data.slugTrees[_page2.default.getParam("lang")];
+    var langTrees = slugTrees[_page2.default.getParam("lang")];
     for (var i = 0; i < langTrees.length; ++i) {
         if (langTrees[i].slug === slug) break;
     }
-    applyContentTree(data.slugTrees[_page2.default.getParam("lang")][i], tree);
+    applyContentTree(slugTrees[_page2.default.getParam("lang")][i], tree);
 });
 
 var selectedPath = [];
@@ -2967,11 +3090,12 @@ var TopicTree = function (_SlugTree) {
         key: "onChildSelect",
         value: function onChildSelect(path) {
             selectedPath = path;
-            $filterTopic.text(this.getChildBySlug(path[0]).title);
-            $clarifStatus.css("display", "block");
+            $filterTopic.text(this.getChildAtPath(path).title);
             _events2.default.fire("filter-changed");
-            if (!_clarifs2.default.loadStarted(path[0])) {
-                _clarifs2.default.load(path[0]);
+            _events2.default.fire("slug-changed");
+            _page2.default.setParam("path", path.join("/"));
+            if (path.length === 1) {
+                (0, _getTree2.default)(path[0], function () {});
             }
         }
     }, {
@@ -3018,7 +3142,7 @@ var TopicTree = function (_SlugTree) {
             var _iteratorError3 = undefined;
 
             try {
-                for (var _iterator3 = data.slugTrees[_page2.default.getParam("lang")][Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                for (var _iterator3 = slugTrees[_page2.default.getParam("lang")][Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
                     var slugTree = _step3.value;
 
                     this.addChild(slugTree);
@@ -3045,7 +3169,7 @@ var TopicTree = function (_SlugTree) {
 
 exports.default = TopicTree;
 
-},{"../api/clarifs.js":9,"../data.js":24,"../events/events.js":26,"../page.js":29,"./slug-tree.js":21}],24:[function(require,module,exports){
+},{"../api/tree/get-tree.js":10,"../data.js":25,"../events/events.js":27,"../page.js":30,"./slug-tree.js":22}],25:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3100,7 +3224,7 @@ exports.default = {
     }
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3165,7 +3289,7 @@ var EventEmitter = function () {
 
 exports.default = EventEmitter;
 
-},{"../utils.js":31,"events":1}],26:[function(require,module,exports){
+},{"../utils.js":32,"events":1}],27:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3180,7 +3304,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = new _eventEmitter2.default();
 
-},{"./event-emitter.js":25}],27:[function(require,module,exports){
+},{"./event-emitter.js":26}],28:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3254,7 +3378,7 @@ exports.default = {
     }
 };
 
-},{"./data.js":24,"./secret/secrets.json":30,"firebase":5}],28:[function(require,module,exports){
+},{"./data.js":25,"./secret/secrets.json":31,"firebase":5}],29:[function(require,module,exports){
 "use strict";
 
 var _authButton = require("./components/auth-button.js");
@@ -3284,6 +3408,10 @@ var _filterPanel2 = _interopRequireDefault(_filterPanel);
 var _languageSelect = require("./components/language-select.js");
 
 var _languageSelect2 = _interopRequireDefault(_languageSelect);
+
+var _loadButton = require("./components/load-button.js");
+
+var _loadButton2 = _interopRequireDefault(_loadButton);
 
 var _page = require("./page.js");
 
@@ -3341,6 +3469,7 @@ function onDataLoad(tags) {
                 noAuth: "<span class='cvka-auth-message'>Hello Guest, click here to log in.</span>"
             }
         });
+        new _loadButton2.default(".js-load-btn");
 
         var $failedRequests = $(".js-failed-requests");
         var $pendingRequests = $(".js-pending-requests");
@@ -3358,7 +3487,7 @@ _fbWrapper2.default.db.ref("/data/tags").once("value", function (tags) {
     onDataLoad(_utils2.default.fbValToArray(tags.val()));
 });
 
-},{"./components/auth-button.js":13,"./components/clarif-view.js":15,"./components/filter-panel.js":18,"./components/language-select.js":19,"./components/tag-modal.js":22,"./components/topic-tree.js":23,"./data.js":24,"./events/events.js":26,"./fb-wrapper.js":27,"./page.js":29,"./utils.js":31}],29:[function(require,module,exports){
+},{"./components/auth-button.js":13,"./components/clarif-view.js":15,"./components/filter-panel.js":18,"./components/language-select.js":19,"./components/load-button.js":20,"./components/tag-modal.js":23,"./components/topic-tree.js":24,"./data.js":25,"./events/events.js":27,"./fb-wrapper.js":28,"./page.js":30,"./utils.js":32}],30:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3454,7 +3583,7 @@ exports.default = {
     }
 };
 
-},{"number-to-base64":8}],30:[function(require,module,exports){
+},{"number-to-base64":8}],31:[function(require,module,exports){
 module.exports={
     "fbCfg": {
         "apiKey": "AIzaSyCpsrWlFtT6WH5CPTbchiOz4xMk3XbbPsU",
@@ -3466,7 +3595,7 @@ module.exports={
     }
 }
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3492,4 +3621,4 @@ exports.default = {
     }
 };
 
-},{}]},{},[28]);
+},{}]},{},[29]);

@@ -1,38 +1,37 @@
 import SlugTree from "./slug-tree.js";
-import clarifs from "../api/clarifs.js";
+// import clarifs from "../api/clarifs.js";
 import events from "../events/events.js";
 import page from "../page.js";
 // import {slugSort} from "../data.js"
-import a from "../data.js";
-let slugSort = a.slugSort;
+import getTree from "../api/tree/get-tree.js";
+import data from "../data.js";
+let {slugSort} = data;
 
-let $clarifStatus = $(".js-clarifs-status")
-    .css("display", "none");
+let $clarifStatus = $(".js-clarifs-status");
 let $filterTopic = $(".js-filter-topic");
 
-let data = {
-    slugTrees: {},
-};
+let slugTrees = {};
 
 events.on("slug-data-loaded", (slugData) => {
-    data.slugTrees[page.getParam("lang")] = [];
+    slugTrees[page.getParam("lang")] = [];
     
     for (let key in slugData) {
         if (slugData.hasOwnProperty(key)) {
             let slug = slugData[key];
-            data.slugTrees[page.getParam("lang")].push(new SlugTree({
+            slugTrees[page.getParam("lang")].push(new SlugTree({
                 className: "cvka-top-level-slug white-text",
                 style: {
                     backgroundColor: slug.color
                 },
                 slug: key,
+                path: "/" + data.topicSlugs[slug.child_index],
                 title: slug.title
             }));
         }
     }
     
-    data.slugTrees[page.getParam("lang")] =
-        data.slugTrees[page.getParam("lang")].sort((a, b) =>
+    slugTrees[page.getParam("lang")] =
+        slugTrees[page.getParam("lang")].sort((a, b) =>
             slugSort[a.slug] - slugSort[b.slug]);
 });
 
@@ -52,11 +51,11 @@ function applyContentTree(slugTree, contentTree) {
 }
 
 events.on("tree-loaded", (slug, tree) => {
-    let langTrees = data.slugTrees[page.getParam("lang")];
+    let langTrees = slugTrees[page.getParam("lang")];
     for (var i = 0; i < langTrees.length; ++i) {
         if (langTrees[i].slug === slug) break;
     }
-    applyContentTree(data.slugTrees[page.getParam("lang")][i], tree);
+    applyContentTree(slugTrees[page.getParam("lang")][i], tree);
 });
 
 let selectedPath = [];
@@ -92,11 +91,12 @@ class TopicTree extends SlugTree {
     }
     onChildSelect(path) {
         selectedPath = path;
-        $filterTopic.text(this.getChildBySlug(path[0]).title);
-        $clarifStatus.css("display", "block");
+        $filterTopic.text(this.getChildAtPath(path).title);
         events.fire("filter-changed");
-        if (!clarifs.loadStarted(path[0])) {
-            clarifs.load(path[0]);
+        events.fire("slug-changed");
+        page.setParam("path", path.join("/"));
+        if (path.length === 1) {
+            getTree(path[0], () => {/* TODO (Joshua): Do something */});
         }
     }
     updateCounters(clarifs) {
@@ -112,7 +112,7 @@ class TopicTree extends SlugTree {
     updateTree() {
         this.clear();
         
-        for (let slugTree of data.slugTrees[page.getParam("lang")]) {
+        for (let slugTree of slugTrees[page.getParam("lang")]) {
             this.addChild(slugTree);
         }
     }
