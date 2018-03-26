@@ -98,7 +98,7 @@ a:hover {
     padding-left: 2.5em;
 }
 
-.cvka-top-level-slug > .cvka-subtopic-slug {
+.cvka-top-level-slug > div > .cvka-subtopic-slug {
     font-size: 0.66666em;
 }
 

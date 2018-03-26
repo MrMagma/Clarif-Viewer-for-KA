@@ -18,19 +18,31 @@ class SlugTree extends EventEmitter {
             .addClass("cvka-counter")
             .text(`(${this.counter})`)
             .css("display", "none");
+        this.$toggle = $("<i>")
+            .addClass("material-icons")
+            .text("keyboard_arrow_down")
+            .click((evt) => {
+                evt.stopPropagation();
+                this.toggleChildrenVisibility(this)
+            });
         this.$nameEl = $("<p>")
             .text(title)
             .addClass("cvka-slug-title")
-            .append(this.$counter);
+            .append(this.$counter)
+            .prepend(this.$toggle);
+        this.$childContainer = $("<div>");
+        
+        this.childrenVisible = true;
         
         this.$domNode.addClass(className);
         this.$domNode.css(style);
         this.$domNode.append(this.$nameEl);
+        this.$domNode.append(this.$childContainer);
         this.init();
     }
     init(cfg = {}) {
         this.on("child-selected", this.handleChildSelect.bind(this));
-        this.$domNode.append(this.children.map(child => child.$domNode));
+        this.$childContainer.append(this.children.map(child => child.$domNode));
     }
     clear() {
         for (let child of this.children) {
@@ -48,7 +60,7 @@ class SlugTree extends EventEmitter {
     addChild(child) {
         child.parent = this;
         this.children.push(child);
-        this.$domNode.append(child.$domNode);
+        this.$childContainer.append(child.$domNode);
     }
     setActive(active) {
         if (active) {
@@ -113,6 +125,17 @@ class SlugTree extends EventEmitter {
     }
     incrementCounter() {
         this.$counter.text(`(${++this.counter})`).css("display", "inline");
+    }
+    toggleChildrenVisibility() {
+        if (this.childrenVisible) {
+            this.childrenVisible = false;
+            this.$toggle.text("keyboard_arrow_right");
+            this.$childContainer.hide();
+        } else {
+            this.childrenVisible = true;
+            this.$toggle.text("keyboard_arrow_down");
+            this.$childContainer.show();
+        }
     }
 }
 

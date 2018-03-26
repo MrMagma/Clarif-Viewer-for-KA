@@ -2519,11 +2519,19 @@ var SlugTree = function (_EventEmitter) {
         });
         _this.$domNode = $("<div>").addClass("cvka-slug").click(_this.handleClick.bind(_this));
         _this.$counter = $("<span>").addClass("cvka-counter").text("(" + _this.counter + ")").css("display", "none");
-        _this.$nameEl = $("<p>").text(title).addClass("cvka-slug-title").append(_this.$counter);
+        _this.$toggle = $("<i>").addClass("material-icons").text("keyboard_arrow_down").click(function (evt) {
+            evt.stopPropagation();
+            _this.toggleChildrenVisibility(_this);
+        });
+        _this.$nameEl = $("<p>").text(title).addClass("cvka-slug-title").append(_this.$counter).prepend(_this.$toggle);
+        _this.$childContainer = $("<div>");
+
+        _this.childrenVisible = true;
 
         _this.$domNode.addClass(className);
         _this.$domNode.css(style);
         _this.$domNode.append(_this.$nameEl);
+        _this.$domNode.append(_this.$childContainer);
         _this.init();
         return _this;
     }
@@ -2534,7 +2542,7 @@ var SlugTree = function (_EventEmitter) {
             var cfg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
             this.on("child-selected", this.handleChildSelect.bind(this));
-            this.$domNode.append(this.children.map(function (child) {
+            this.$childContainer.append(this.children.map(function (child) {
                 return child.$domNode;
             }));
         }
@@ -2584,7 +2592,7 @@ var SlugTree = function (_EventEmitter) {
         value: function addChild(child) {
             child.parent = this;
             this.children.push(child);
-            this.$domNode.append(child.$domNode);
+            this.$childContainer.append(child.$domNode);
         }
     }, {
         key: "setActive",
@@ -2710,6 +2718,19 @@ var SlugTree = function (_EventEmitter) {
         key: "incrementCounter",
         value: function incrementCounter() {
             this.$counter.text("(" + ++this.counter + ")").css("display", "inline");
+        }
+    }, {
+        key: "toggleChildrenVisibility",
+        value: function toggleChildrenVisibility() {
+            if (this.childrenVisible) {
+                this.childrenVisible = false;
+                this.$toggle.text("keyboard_arrow_right");
+                this.$childContainer.hide();
+            } else {
+                this.childrenVisible = true;
+                this.$toggle.text("keyboard_arrow_down");
+                this.$childContainer.show();
+            }
         }
     }]);
 
@@ -3080,6 +3101,7 @@ var TopicTree = function (_SlugTree) {
 
         _this.$nameEl.css("display", "none");
 
+        _this.$domNode.append(_this.$childContainer);
         _this.on("child-selected", _this.onChildSelect.bind(_this));
         _events2.default.on("clarifs-added", _this.updateCounters.bind(_this));
         _events2.default.on("slug-data-loaded", _this.updateTree.bind(_this));

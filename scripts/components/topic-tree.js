@@ -85,6 +85,7 @@ class TopicTree extends SlugTree {
         
         this.$nameEl.css("display", "none");
         
+        this.$domNode.append(this.$childContainer);
         this.on("child-selected", this.onChildSelect.bind(this));
         events.on("clarifs-added", this.updateCounters.bind(this));
         events.on("slug-data-loaded", this.updateTree.bind(this));
