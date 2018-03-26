@@ -3133,10 +3133,11 @@ var TopicTree = function (_SlugTree) {
                     var path = _ref2.parentSlug;
 
                     path = path.slice(1, path.length).split("/");
+                    this.incrementCounter();
                     var child = this;
                     do {
-                        child.incrementCounter();
                         child = child.getChildBySlug(path.shift());
+                        child.incrementCounter();
                     } while (path.length > 0);
                 }
             } catch (err) {
