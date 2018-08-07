@@ -25,7 +25,8 @@ events.on("slug-data-loaded", (slugData) => {
                 },
                 slug: key,
                 path: "/" + data.topicSlugs[slug.child_index],
-                title: slug.title
+                title: slug.title,
+                childrenVisible: false
             }));
         }
     }
@@ -55,6 +56,7 @@ events.on("tree-loaded", (slug, tree) => {
     for (var i = 0; i < langTrees.length; ++i) {
         if (langTrees[i].slug === slug) break;
     }
+    slugTrees[page.getParam("lang")][i].toggleChildrenVisibility();
     applyContentTree(slugTrees[page.getParam("lang")][i], tree);
 });
 

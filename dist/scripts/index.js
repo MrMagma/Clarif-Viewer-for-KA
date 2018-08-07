@@ -22466,7 +22466,9 @@ var SlugTree = function (_EventEmitter) {
             _cfg$parent = cfg.parent,
             parent = _cfg$parent === undefined ? null : _cfg$parent,
             _cfg$children = cfg.children,
-            children = _cfg$children === undefined ? [] : _cfg$children;
+            children = _cfg$children === undefined ? [] : _cfg$children,
+            _cfg$childrenVisible = cfg.childrenVisible,
+            childrenVisible = _cfg$childrenVisible === undefined ? true : _cfg$childrenVisible;
 
         var _this = _possibleConstructorReturn(this, (SlugTree.__proto__ || Object.getPrototypeOf(SlugTree)).call(this));
 
@@ -22478,16 +22480,16 @@ var SlugTree = function (_EventEmitter) {
         _this.children = children.map(function (child) {
             return new SlugTree(child);
         });
+        _this.childrenVisible = childrenVisible;
+
         _this.$domNode = $("<div>").addClass("cvka-slug").click(_this.handleClick.bind(_this));
         _this.$counter = $("<span>").addClass("cvka-counter").text("(" + _this.counter + ")").css("display", "none");
-        _this.$toggle = $("<i>").addClass("material-icons").text("keyboard_arrow_down").click(function (evt) {
+        _this.$toggle = $("<i>").addClass("material-icons").text(_this.childrenVisible ? "keyboard_arrow_down" : "keyboard_arrow_right").click(function (evt) {
             evt.stopPropagation();
             _this.toggleChildrenVisibility(_this);
-        });
+        }).css("display", _this.children.length > 0 ? "" : "none");
         _this.$nameEl = $("<p>").text(title).addClass("cvka-slug-title").append(_this.$counter).prepend(_this.$toggle);
         _this.$childContainer = $("<div>");
-
-        _this.childrenVisible = true;
 
         _this.$domNode.addClass(className);
         _this.$domNode.css(style);
@@ -22536,6 +22538,7 @@ var SlugTree = function (_EventEmitter) {
             }
 
             this.children = [];
+            this.$toggle.css("display", this.children.length > 0 ? "" : "none");
         }
     }, {
         key: "destroy",
@@ -22554,6 +22557,7 @@ var SlugTree = function (_EventEmitter) {
             child.parent = this;
             this.children.push(child);
             this.$childContainer.append(child.$domNode);
+            this.$toggle.css("display", this.children.length > 0 ? "" : "none");
         }
     }, {
         key: "setActive",
@@ -22976,7 +22980,8 @@ _events2.default.on("slug-data-loaded", function (slugData) {
                 },
                 slug: key,
                 path: "/" + _data2.default.topicSlugs[slug.child_index],
-                title: slug.title
+                title: slug.title,
+                childrenVisible: false
             }));
         }
     }
@@ -23027,6 +23032,7 @@ _events2.default.on("tree-loaded", function (slug, tree) {
     for (var i = 0; i < langTrees.length; ++i) {
         if (langTrees[i].slug === slug) break;
     }
+    slugTrees[_page2.default.getParam("lang")][i].toggleChildrenVisibility();
     applyContentTree(slugTrees[_page2.default.getParam("lang")][i], tree);
 });
 

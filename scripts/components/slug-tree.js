@@ -3,7 +3,7 @@ import EventEmitter from "../events/event-emitter.js";
 class SlugTree extends EventEmitter {
     constructor(cfg = {}) {
         let {title, slug, path = "/", className = "", style = {},
-            parent = null, children = []} = cfg;
+            parent = null, children = [], childrenVisible = true} = cfg;
         super();
         this.parent = parent;
         this.title = title;
@@ -11,6 +11,8 @@ class SlugTree extends EventEmitter {
         this.path = path;
         this.counter = 0;
         this.children = children.map(child => new SlugTree(child));
+        this.childrenVisible = childrenVisible;
+
         this.$domNode = $("<div>")
             .addClass("cvka-slug")
             .click(this.handleClick.bind(this));
@@ -20,19 +22,18 @@ class SlugTree extends EventEmitter {
             .css("display", "none");
         this.$toggle = $("<i>")
             .addClass("material-icons")
-            .text("keyboard_arrow_down")
+            .text(this.childrenVisible ? "keyboard_arrow_down" : "keyboard_arrow_right")
             .click((evt) => {
                 evt.stopPropagation();
                 this.toggleChildrenVisibility(this)
-            });
+            })
+            .css("display", this.children.length > 0 ? "" : "none");
         this.$nameEl = $("<p>")
             .text(title)
             .addClass("cvka-slug-title")
             .append(this.$counter)
             .prepend(this.$toggle);
         this.$childContainer = $("<div>");
-        
-        this.childrenVisible = true;
         
         this.$domNode.addClass(className);
         this.$domNode.css(style);
@@ -49,6 +50,7 @@ class SlugTree extends EventEmitter {
             child.destroy();
         }
         this.children = [];
+        this.$toggle.css("display", this.children.length > 0 ? "" : "none");
     }
     destroy() {
         this.$domNode.remove();
@@ -61,6 +63,7 @@ class SlugTree extends EventEmitter {
         child.parent = this;
         this.children.push(child);
         this.$childContainer.append(child.$domNode);
+        this.$toggle.css("display", this.children.length > 0 ? "" : "none");
     }
     setActive(active) {
         if (active) {
