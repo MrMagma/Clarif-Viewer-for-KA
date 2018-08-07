@@ -22620,7 +22620,7 @@ var SlugTree = function (_EventEmitter) {
         key: "handleClick",
         value: function handleClick(evt) {
             evt.stopPropagation();
-            this.handleChildSelect(this.path.split("/").slice(1, Infinity));
+            this.handleChildSelect(this.path.split("/").slice(1));
         }
     }, {
         key: "handleChildSelect",
@@ -22979,7 +22979,7 @@ _events2.default.on("slug-data-loaded", function (slugData) {
                     backgroundColor: slug.color
                 },
                 slug: key,
-                path: "/" + _data2.default.topicSlugs[slug.child_index],
+                path: "/" + key,
                 title: slug.title,
                 childrenVisible: false
             }));

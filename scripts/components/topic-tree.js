@@ -24,7 +24,7 @@ events.on("slug-data-loaded", (slugData) => {
                     backgroundColor: slug.color
                 },
                 slug: key,
-                path: "/" + data.topicSlugs[slug.child_index],
+                path: "/" + key,
                 title: slug.title,
                 childrenVisible: false
             }));

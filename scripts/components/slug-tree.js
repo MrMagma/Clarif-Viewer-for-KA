@@ -96,7 +96,7 @@ class SlugTree extends EventEmitter {
     }
     handleClick(evt) {
         evt.stopPropagation();
-        this.handleChildSelect(this.path.split("/").slice(1, Infinity));
+        this.handleChildSelect(this.path.split("/").slice(1));
     }
     handleChildSelect(path) {
         if (this.parent != null) {
