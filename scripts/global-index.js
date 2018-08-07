@@ -64,6 +64,6 @@ function onDataLoad(tags) {
     });
 }
 
-fb.db.ref("/data/tags").once("value", (tags) => {
+fb.db.ref("/data/tags").once("value").then((tags) => {
     onDataLoad(util.fbValToArray(tags.val()));
 });

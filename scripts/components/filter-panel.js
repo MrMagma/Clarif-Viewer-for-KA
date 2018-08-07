@@ -75,7 +75,7 @@ class FilterPanel {
         return false;
     }
     handleFilterChange() {
-        fb.db.ref("/data/tags").once("value", (snapshot) => {
+        fb.db.ref("/data/tags").once("value").then((snapshot) => {
             let tags = Object.keys(snapshot.val());
             let tagSelection = this.filter.getData("tags");
             page.setParam("filter-tags", parseInt(tags.reverse()

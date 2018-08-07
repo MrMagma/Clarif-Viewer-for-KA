@@ -31,7 +31,7 @@ let user = null;
 })();
 
 function registerUser() {
-    fb.db.ref(`/users/${user.uid}`).once("value", (snapshot) => {
+    fb.db.ref(`/users/${user.uid}`).once("value").then((snapshot) => {
         if (snapshot.exists()) {
             // Possibly update profile picture and stuff.
         } else {

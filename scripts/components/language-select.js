@@ -13,7 +13,7 @@ class LanguageSelect {
         this.$domNode = $("<select>")
             .change(this.handleLangChange.bind(this));
         
-        fb.db.ref("/data/languages").once("value", (snapshot) => {
+        fb.db.ref("/data/languages").once("value").then((snapshot) => {
             this.handleLangLoad(snapshot.val());
         });
         

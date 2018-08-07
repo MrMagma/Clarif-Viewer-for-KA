@@ -11,7 +11,7 @@ let {formatString, fbValToArray} = utils,
     {db} = data;
 
 let kindMap = {};
-fb.db.ref("/data/tags").once("value", (snapshot) => {
+fb.db.ref("/data/tags").once("value").then((snapshot) => {
     let keys = Object.keys(snapshot.val());
     kindMap.video = keys[0];
     kindMap.article = keys[1];
@@ -113,7 +113,7 @@ class Loader extends EventEmitter {
         
         this.loadStarted[path[path.length - 1]] = true;
         
-        fb.db.ref(`/tagged_clarifs/${path[0]}`).once("value", (snapshot) => {
+        fb.db.ref(`/tagged_clarifs/${path[0]}`).once("value").then((snapshot) => {
             let _tags = snapshot.val();
             for (let key in _tags) {
                 _tags[key] = fbValToArray(_tags[key]);

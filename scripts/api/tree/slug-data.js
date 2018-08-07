@@ -6,7 +6,8 @@ let slugData = {};
 
 function updateSlugMap() {
     fb.db.ref(`/content_trees/${page.getParam("lang")}/slug_data`)
-        .once("value", (snapshot) => {
+        .once("value")
+        .then((snapshot) => {
             slugData[page.getParam("lang")] = snapshot.val();
             events.fire("slug-data-loaded", snapshot.val());
         });

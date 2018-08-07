@@ -1,4 +1,6 @@
-import firebase from "firebase";
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/database";
 import secrets from "./secret/secrets.json";
 import data from "./data.js";
 
@@ -18,7 +20,7 @@ export default {
                 cbs: [cb]
             };
             
-            this.db.ref(path).once("value", (snapshot) => {
+            this.db.ref(path).once("value").then((snapshot) => {
                 cache[path].data = snapshot.val();
                 for (let cb of cache[path].cbs) {
                     cb(cache[path].data);

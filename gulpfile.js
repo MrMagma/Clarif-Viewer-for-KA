@@ -2,133 +2,107 @@ var gulp = require("gulp");
 
 var del = require("del");
 
-gulp.task("del-js", function() {
-    return del.sync("./dist/scripts/**/*");
-});
+const delJS = (done) => {
+    return del("./dist/scripts/**/*", done);
+};
 
-gulp.task("del-css", function() {
-    return del.sync("./dist/styles/**/*");
-});
+const delCSS = (done) => {
+    return del("./dist/styles/**/*", done);
+};
 
-gulp.task("del-html", function() {
-    return del.sync("./*.html");
-});
+const delHTML = (done) => {
+    return del("./*.html", done);
+};
 
 var browserify = require("browserify");
 var babelify = require("babelify");
 var source = require("vinyl-source-stream");
 var buffer = require("vinyl-buffer");
-var util = require("gulp-util");
 var es = require("event-stream");
 var glob = require("glob");
 var uglify = require("gulp-uglify");
 
-gulp.task("build-js", ["del-js"], function(done) {
-    glob("./scripts/global-**.js", function(err, files) {
-        if (err) {
+const buildJS = (done) => {
+    glob("./scripts/global-**.js", (err, files) => {
+        if (err || files == null) {
             done(err);
             return;
         }
 
-        if (files == null) {
-            done();
-            return;
-        }
-
-        var tasks = files.map(function(entry) {
-            var babelCfg = {
-                // compact: true,
-                compact: false,
-                comments: false
-            };
-
-            var rename = /\/global-([^\/]+)\..+$/.exec(entry)[1] + ".js";
-
-            return browserify({
+        es.merge(files.map((entry) =>
+            browserify({
                 extensions: [".js"],
                 entries: [entry],
                 transform: [
-                    babelify.configure(babelCfg)
+                    babelify.configure({
+                        // compact: true,
+                        compact: false,
+                        comments: false
+                    })
                 ]
             })
                 .bundle()
-                .pipe(source(rename))
+                .pipe(source(entry.replace(/.+\/global-([^\/]+)\..+$/, "$1.js")))
                 .pipe(buffer())
                 // .pipe(uglify())
-                .pipe(gulp.dest("./dist/scripts"));
-        });
-
-        task = es.merge(tasks).on("end", done);
+                .pipe(gulp.dest("./dist/scripts"))
+        )).on("end", done);
     });
-});
+};
 
 var rename = require("gulp-rename");
 var postcss = require("gulp-postcss");
 var cssmin = require("gulp-cssmin");
 
-gulp.task("build-css", ["del-css"], function(done) {
-    glob("./styles/global-**.css", function(err, files) {
-        if (err) {
+const buildCSS = (done) => {
+    glob("./styles/global-**.css", (err, files) => {
+        if (err || files == null) {
             done(err);
             return;
         }
 
-        if (files == null) {
-            done();
-            return;
-        }
-        var tasks = files.map(function(entry) {
-            var name = /\/global-([^\/]+)\..+$/.exec(entry)[1] + ".css";
-
-            return gulp.src(entry)
-                .pipe(postcss([
+        es.merge(files.map((entry) =>
+            gulp.src(entry)
+                .pipe(postcss(
+                    [
                         "postcss-clearfix",
                         "postcss-color-short",
                         "postcss-cssnext",
                         "postcss-hidden",
                         "postcss-short",
-                ].map(function(processor) {
-                    return require(processor);
-                })))
-                .pipe(rename(name))
+                    ].map((processor) => require(processor))
+                ))
+                .pipe(rename(entry.replace(/.+\/global-([^\/]+)\..+$/, "$1.css")))
                 .pipe(cssmin())
-                .pipe(gulp.dest("./dist/styles/"));
-        });
-
-        task = es.merge(tasks).on("end", done);
+                .pipe(gulp.dest("./dist/styles/"))
+        )).on("end", done);
     });
-});
+};
 
 var handlebars = require("gulp-compile-handlebars");
 var htmlmin = require("gulp-htmlmin");
 
-gulp.task("build-html", ["del-html"], function(done) {
-    glob("./templates/*.handlebars", function(err, files) {
-        if (err) {
+const buildHTML = (done) => {
+    glob("./templates/*.handlebars", (err, files) => {
+        if (err || files == null) {
             done(err);
             return;
         }
-
-        if (files == null) {
-            done();
-            return;
-        }
-        var tasks = files.map(function(entry) {
-            var name = /\/([^\/]+)\..+$/.exec(entry)[1] + ".html";
-
-            return gulp.src(entry)
+        
+        es.merge(files.map((entry) =>
+            gulp.src(entry)
                 .pipe(handlebars({}, {
                     batch: ["./templates/partials"]
                 }))
-                .pipe(rename(name))
+                .pipe(rename(entry.replace(/.+\/([^\/]+)\..+$/, "$1.html")))
                 .pipe(htmlmin({collapseWhitespace: true}))
-                .pipe(gulp.dest("./"));
-        });
-
-        task = es.merge(tasks).on("end", done);
+                .pipe(gulp.dest("./"))
+        )).on("end", done);
     });
-});
+};
 
-gulp.task("build", ["build-css", "build-js", "build-html"]);
-
-gulp.task("default", ["build"]);
+gulp.task("build-js", gulp.series(delJS, buildJS));
+gulp.task("build-html", gulp.series(delHTML, buildHTML));
+gulp.task("build-css", gulp.series(delCSS, buildCSS));
+gulp.task("build", gulp.parallel("build-js", "build-html", "build-css"));
+gulp.task("default", gulp.parallel("build"));

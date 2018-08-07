@@ -5,7 +5,7 @@ import {tag as tagCreator} from "./components/creators.js";
 
 let $usersTable, permissions = null, permissionsData = null, tags = null;
 
-fb.db.ref("/data/permissions").once("value", (snapshot) => {
+fb.db.ref("/data/permissions").once("value").then((snapshot) => {
     permissions = snapshot.val();
     
     console.log("permissions", permissions, permissionsData);
@@ -14,7 +14,7 @@ fb.db.ref("/data/permissions").once("value", (snapshot) => {
     }
 });
 
-fb.db.ref("/data/permission_data").once("value", (snapshot) => {
+fb.db.ref("/data/permission_data").once("value").then((snapshot) => {
     permissionsData = snapshot.val();
     console.log("permissions_data", permissions, permissionsData);
     if (permissions != null && permissionsData != null) {
@@ -130,7 +130,7 @@ $(document).ready(() => {
     
     $usersTable = $(".js-users");
     
-    fb.db.ref("/users").once("value", (snapshot) => {
+    fb.db.ref("/users").once("value").then((snapshot) => {
         if (permissions != null && permissionsData != null) {
             addToUsersTable(snapshot.val());
         } else {
@@ -139,7 +139,7 @@ $(document).ready(() => {
         }
     });
     
-    fb.db.ref("/data/tags").once("value", (snapshot) => {
+    fb.db.ref("/data/tags").once("value").then((snapshot) => {
         tags = snapshot.val();
         initTags();
     });
