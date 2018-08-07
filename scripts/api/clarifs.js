@@ -114,9 +114,9 @@ class Loader extends EventEmitter {
         this.loadStarted[path[path.length - 1]] = true;
         
         fb.db.ref(`/tagged_clarifs/${path[0]}`).once("value").then((snapshot) => {
-            let _tags = snapshot.val();
+            let _tags = snapshot.val() || {};
             for (let key in _tags) {
-                _tags[key] = fbValToArray(_tags[key]);
+                if (_tags.hasOwnProperty(key)) _tags[key] = fbValToArray(_tags[key]);
             }
             this._tags = _tags;
             

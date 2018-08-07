@@ -35,8 +35,7 @@ const buildJS = (done) => {
                 entries: [entry],
                 transform: [
                     babelify.configure({
-                        // compact: true,
-                        compact: false,
+                        compact: true,
                         comments: false
                     })
                 ]
@@ -44,7 +43,7 @@ const buildJS = (done) => {
                 .bundle()
                 .pipe(source(entry.replace(/.+\/global-([^\/]+)\..+$/, "$1.js")))
                 .pipe(buffer())
-                // .pipe(uglify())
+                .pipe(uglify())
                 .pipe(gulp.dest("./dist/scripts"))
         )).on("end", done);
     });
